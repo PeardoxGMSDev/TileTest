@@ -21,3 +21,8 @@ Before spending any more time on this it is very important to increase the draw 
 It is possible that some different drawing method or some advanced gm feature such as disabling depth may improve things but tests show no significant improvements so far
 
 This repo is a simple example in support of the associated [GM Feature Request](https://github.com/YoYoGames/GameMaker-Bugs/issues/12948)
+
+### Updates
+
+0.2 Add tileset_data and precalc offsets (slower???)
+0.1 Initial
