@@ -1,6 +1,10 @@
 // Whether to use dynamic tilesets at start (switch over with SPACE)
+enum DRAW_MODE {
+    TILEMAP_BUILTIN,
+    TILEMAP_DYNAMIC
+}
 if(!variable_global_exists("active")) {
-    global.active = false;
+    global.active = DRAW_MODE.TILEMAP_BUILTIN;
 }
 
 /* 

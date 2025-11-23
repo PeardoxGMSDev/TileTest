@@ -15,7 +15,7 @@ tilemap_set_height(map_id, _h);
 tcount = 0;
 
 // If we're drawing Dynamic Tiles...
-if(active) {
+if(active == DRAW_MODE.TILEMAP_DYNAMIC) {
     // Don't need a Tileset so delete the layer measning it won't be drawn
     layer_destroy("Tiles_1");
     // Create out own dynamic tileset from the same sprite
@@ -37,7 +37,7 @@ if(active) {
         }
     }
     tmap.assignTileset(tset);
-} else {
+} else if(active == DRAW_MODE.TILEMAP_BUILTIN) {
     for(var _y = 0; _y <  _h; _y++) {
         for(var _x = 0; _x < _w; _x++) {
             var _tile = tcount mod 48;
