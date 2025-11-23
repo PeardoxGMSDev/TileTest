@@ -24,6 +24,8 @@ This repo is a simple example in support of the associated [GM Feature Request](
 
 ### Updates
 
+0.3.2 Screen Saver Bounce Tilemap (with gap)
+
 0.3.1 Add capability to switch between more than two test states
 
 0.3 Add tilemap and use it to draw

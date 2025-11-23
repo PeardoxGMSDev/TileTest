@@ -3,7 +3,7 @@ room_width = display_get_width();
 room_height = display_get_height();
 window_enable_borderless_fullscreen(true);
 window_set_fullscreen(true);
-surface_resize(application_surface, room_width, room_height);
+
 
 // Rewrite the tilemap so it matches the dynamic one we're testing
 var lay_id = layer_get_id("Tiles_1");
@@ -46,3 +46,26 @@ if(active == DRAW_MODE.TILEMAP_DYNAMIC) {
         } 
     }    
 }
+
+virtual_scale = 4;
+virtual_width = display_get_width() / virtual_scale;
+virtual_height = display_get_height() / virtual_scale;
+
+lookat_x = virtual_width div 2;
+lookat_y = virtual_height div 2;
+
+cam = camera_create();
+view_set_camera(view, cam);
+var _viewmat = matrix_build_lookat(lookat_x, lookat_y, -10, lookat_x, lookat_y, 0, 0, 1, 0);
+var _projmat = matrix_build_projection_ortho(virtual_width, virtual_height, 1.0, 32000.0);
+camera_set_view_mat(cam, _viewmat);
+camera_set_proj_mat(cam, _projmat);
+view_enabled = true;
+view_set_visible(view, true);
+view_set_wport(view, virtual_width);
+view_set_hport(view, virtual_height);
+
+surface_resize(application_surface, virtual_width, virtual_height);
+// surface_resize(application_surface, room_width, room_height);
+
+//camera_set_default(-1);
