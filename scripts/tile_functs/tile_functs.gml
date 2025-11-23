@@ -9,6 +9,10 @@ if(!variable_global_exists("active")) {
  * the draw speed as if this is poor then dynamic tilesets are pointless
  */
 
+enum TILE_TEXTURE_DRAW_MODE {
+    TRIANGLE_STRIP,
+    TRIANGLE_LIST
+ }
 
 /// @function tileset_data
 /// @description Tileset data
@@ -63,6 +67,8 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
             self.rows = rows;
             self.total_tiles = _tt;
             self.offset = array_create(_tt);
+            self.textureDrawMethod = TILE_TEXTURE_DRAW_MODE.TRIANGLE_STRIP;
+
             // Precalculate all legal offsets
             for(var _ti = 0; _ti < _tt; _ti++) {
                 var source_x = (_ti mod columns) * tile_width;
@@ -78,9 +84,7 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
     /// @param {Real} tile_index - Which tile to draw (0-based)
     /// @param {Real} x - X position to draw at
     /// @param {Real} y - Y position to draw at
-    
-    static draw = function(tile_index, x, y) {
-        
+    static draw_tile = function(tile_index, x, y) {
         if (tile_index >= self.total_tiles) return;
     
         var o = self.offset[tile_index];
@@ -91,6 +95,53 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
             source_x, source_y,
             self.tile_width, self.tile_height,
             x * self.tile_width, y * self.tile_height);
-        }
+    }
+    
+
 }
 
+function tilemap(width, height) constructor {
+    self.width = width;
+    self.height = height;
+    self.tiles = array_create(width * height);
+    self.count = width * height;
+    self.tileset = noone;
+    
+    /// @function setTile
+    /// @description Assign a tile to a specific row and column
+    /// @param {Real} x - X position to draw at
+    /// @param {Real} y - Y position to draw at
+    /// @param {Real} tile_index - Which tile to draw (0-based)
+    static setTile = function(x, y, tile_index) {
+        var _index = x + (y * self.width);
+        if((_index >= 0) && (_index < self.count)) {
+            self.tiles[_index] = tile_index;
+            return true;
+        }
+        return false;
+    }
+    
+    /// @function assignTileset
+    /// @description Assign a Tileset to a Tilemap
+    /// @param {Struct.tileset} atileset - Which tile to draw (0-based)
+    static assignTileset = function(atileset) {
+        self.tileset = atileset;
+    }    
+    
+    static draw = function() {
+        var _count = 0;
+        // Loop over rows in dynamic tileset
+        for(var _y = 0; _y < self.height; _y++) {
+        // Loop over columns in dynamic tileset
+            for(var _x = 0; _x < self.width; _x++) {
+        // Pick a tile - here it's the full (extended) set
+                var _index = _x + (_y * self.width);
+                var _tile = self.tiles[_index];
+        // Draw the dynamic tile
+                self.tileset.draw_tile(_tile, _x, _y);
+                _count++;
+            }
+        }
+        return _count;
+    }
+}
