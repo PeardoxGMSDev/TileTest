@@ -3,6 +3,13 @@ if(keyboard_check(vk_escape)) {
     game_end();
 }
 
+if(keyboard_check(ord("R"))) {
+    do_bounce = false;
+    do_rotate = true;
+    lookat_x = (room_width div 2) - (virtual_width div 2);
+    lookat_y = (room_height div 2) - (virtual_height div 2);
+}
+
 // Space = Restart in other tile draw mode
 if(keyboard_check(vk_space)) {
     switch (global.active) {
@@ -35,8 +42,10 @@ if((lookat_y + bounce_y) > (room_height - (virtual_height div 2))) {
     bounce_y = -1;
 }
 
-lookat_x += bounce_x;
-lookat_y += bounce_y;
+if(do_bounce) {
+    lookat_x += bounce_x;
+    lookat_y += bounce_y;
+}
 
 lookat_x = clamp(lookat_x, 0, room_width - (virtual_width div 2));
 lookat_y = clamp(lookat_y, 0, room_height - (virtual_height div 2));
@@ -46,7 +55,18 @@ if(maxx < lookat_x) { maxx = lookat_x };
 if(miny > lookat_y) { miny = lookat_y };
 if(maxy < lookat_y) { maxy = lookat_y };
 
-var _viewmat = matrix_build_lookat(lookat_x, lookat_y, -10, lookat_x, lookat_y, 0, 0, 1, 0);
-var _projmat = matrix_build_projection_ortho(virtual_width, virtual_height, 1.0, 32000.0);
+if(do_rotate) {
+    rot += bounce_rot;
+}
+if(rot >= 360) {
+    rot = 0;
+}
+var _rot_x = dsin(rot);
+var _rot_y = dcos(rot);
+
+// var _viewmat = matrix_build_lookat(lookat_x, lookat_y, -10, lookat_x, lookat_y, 0, 0, 1, 0);
+var _viewmat = matrix_build_lookat(lookat_x, lookat_y, -10, lookat_x, lookat_y, 0, _rot_x, _rot_y, 0);
+// var _projmat = matrix_build_projection_ortho(virtual_width, virtual_height, 1.0, 32000.0);
 camera_set_view_mat(cam, _viewmat);
-camera_set_proj_mat(cam, _projmat);
+// camera_set_proj_mat(cam, _projmat);
+// camera_set_view_angle(cam, rot);
