@@ -17,6 +17,7 @@ maxx = -9999999999;
 miny =  9999999999;
 maxy = -9999999999;
 
+game_set_speed(display_get_frequency(), gamespeed_fps);
 
 /*
 var _old_cam = view_get_camera(view);

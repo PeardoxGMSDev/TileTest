@@ -6,12 +6,6 @@ window_set_fullscreen(true);
 
 
 // Rewrite the tilemap so it matches the dynamic one we're testing
-var lay_id = layer_get_id("Tiles_1");
-var map_id = layer_tilemap_get_id(lay_id);
-var _w = room_width div tilemap_get_tile_width(map_id);
-var _h = room_height div tilemap_get_tile_height(map_id);
-tilemap_set_width(map_id, _w);
-tilemap_set_height(map_id, _h);
 tcount = 0;
 
 // If we're drawing Dynamic Tiles...
@@ -37,7 +31,17 @@ if(active == DRAW_MODE.TILEMAP_DYNAMIC) {
         }
     }
     tmap.assignTileset(tset);
+    room_width = _cell_width * tset.tile_width;
+    room_height = _cell_height * tset.tile_height;
+    surface_resize(application_surface, room_width, room_height);
 } else if(active == DRAW_MODE.TILEMAP_BUILTIN) {
+    var lay_id = layer_get_id("Tiles_1");
+    var map_id = layer_tilemap_get_id(lay_id);
+    var _w = room_width div tilemap_get_tile_width(map_id);
+    var _h = room_height div tilemap_get_tile_height(map_id);
+    tilemap_set_width(map_id, _w);
+    tilemap_set_height(map_id, _h);
+        
     for(var _y = 0; _y <  _h; _y++) {
         for(var _x = 0; _x < _w; _x++) {
             var _tile = tcount mod 48;
@@ -45,6 +49,9 @@ if(active == DRAW_MODE.TILEMAP_DYNAMIC) {
             tcount++; 
         } 
     }    
+    room_width = _w * tilemap_get_tile_width(map_id);
+    room_height = _h * tilemap_get_tile_height(map_id);
+    surface_resize(application_surface, room_width, room_height);
 }
 
 virtual_scale = 4;
@@ -64,8 +71,3 @@ view_enabled = true;
 view_set_visible(view, true);
 view_set_wport(view, virtual_width);
 view_set_hport(view, virtual_height);
-
-surface_resize(application_surface, virtual_width, virtual_height);
-// surface_resize(application_surface, room_width, room_height);
-
-//camera_set_default(-1);
