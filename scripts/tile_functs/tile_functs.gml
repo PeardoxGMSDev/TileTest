@@ -258,7 +258,7 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
             
             self.border_sprite = sprite_create_from_surface(_surf, 0, 0, _width, _height, false, false, 0, 0);
             self.has_border = true;
-sprite_save(self.border_sprite, 0, "C:\\video\\check.png")            
+// sprite_save(self.border_sprite, 0, "C:\\video\\check.png")            
             // Recalculate offsets + uvs with borders
             self.calculate_offsets();
             self.calculate_uvs();
