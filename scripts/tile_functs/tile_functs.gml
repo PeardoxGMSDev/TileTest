@@ -187,7 +187,8 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
                         (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y  + self.tile_height + _b);
                 }
 
-                if((_x > 0) || (_y > 0)) {
+//                if((_x > 0) || (_y > 0))
+ {
                     var _lx = (_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x;
                     var _ly = (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y;
                     
@@ -209,9 +210,10 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
         }
         
         self.border_sprite = sprite_create_from_surface(_surf, 0, 0, _width, _height, false, false, 0, 0);
-sprite_save(self.border_sprite, 0, "C:\\video\\bspr.png");
+// sprite_save(self.border_sprite, 0, "C:\\video\\bspr.png");
         show_debug_message(string(sprite_get_width(self.border_sprite)) + " x " + string(sprite_get_height(self.border_sprite)));
         surface_reset_target();
+        surface_free(_surf);
             
         self.has_border = true;
         return true;
