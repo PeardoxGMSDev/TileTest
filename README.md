@@ -24,6 +24,8 @@ This repo is a simple example in support of the associated [GM Feature Request](
 
 ### Updates
 
+0.4.0 Match GMS Border tile padding pixel extension
+
 0.3.4 Add Rotate Option
 
 0.3.3 Fix gap
@@ -32,8 +34,8 @@ This repo is a simple example in support of the associated [GM Feature Request](
 
 0.3.1 Add capability to switch between more than two test states
 
-0.3 Add tilemap and use it to draw
+0.3.0 Add tilemap and use it to draw
 
-0.2 Add tileset_data and precalc offsets (slower???)
+0.2.0 Add tileset_data and precalc offsets (slower???)
 
-0.1 Initial
+0.1.0 Initial

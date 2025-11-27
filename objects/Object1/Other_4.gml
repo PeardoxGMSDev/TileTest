@@ -13,7 +13,7 @@ if(active == DRAW_MODE.TILEMAP_DYNAMIC) {
     // Don't need a Tileset so delete the layer measning it won't be drawn
     layer_destroy("Tiles_1");
     // Create out own dynamic tileset from the same sprite
-    tset = new tileset(GrassMap49, 64, 64, 7, 7);
+    tset = new tileset(GrassMap49, 64, 64, 7, 7, 48);
     
     var _cell_width = room_width div tset.tile_width;
     var _cell_height = room_height div tset.tile_height;
@@ -54,7 +54,6 @@ if(active == DRAW_MODE.TILEMAP_DYNAMIC) {
     surface_resize(application_surface, room_width, room_height);
 }
 
-virtual_scale = 4;
 virtual_width = display_get_width() / virtual_scale;
 virtual_height = display_get_height() / virtual_scale;
 

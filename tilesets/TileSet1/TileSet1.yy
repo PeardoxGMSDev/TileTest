@@ -14,8 +14,8 @@
   },
   "name":"TileSet1",
   "out_columns":7,
-  "out_tilehborder":2,
-  "out_tilevborder":2,
+  "out_tilehborder":16,
+  "out_tilevborder":16,
   "parent":{
     "name":"TileTest",
     "path":"TileTest.yyp",
