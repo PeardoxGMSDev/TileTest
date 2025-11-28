@@ -8,8 +8,7 @@ window_set_fullscreen(true);
 // Rewrite the tilemap so it matches the dynamic one we're testing
 tcount = 0;
 
-// If we're drawing Dynamic Tiles...
-if(active == DRAW_MODE.TILEMAP_DYNAMIC) {
+if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     // Don't need a Tileset so delete the layer measning it won't be drawn
     layer_destroy("Tiles_1");
     // Create out own dynamic tileset from the same sprite
@@ -57,9 +56,12 @@ if(active == DRAW_MODE.TILEMAP_DYNAMIC) {
 virtual_width = display_get_width() / virtual_scale;
 virtual_height = display_get_height() / virtual_scale;
 
-lookat_x = virtual_width div 2;
-lookat_y = virtual_height div 2;
+lookat_x = (room_width div 2) + (virtual_width div 2);
+lookat_y = (room_height div 2) + (virtual_height div 2);
 
+if(cam != -1) {
+    camera_destroy(cam)
+}
 cam = camera_create();
 view_set_camera(view, cam);
 var _viewmat = matrix_build_lookat(lookat_x, lookat_y, -10, lookat_x, lookat_y, 0, 0, 1, 0);

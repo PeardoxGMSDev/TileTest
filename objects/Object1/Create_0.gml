@@ -9,10 +9,10 @@ rot = 0;
 
 virtual_width = 0;
 virtual_height = 0;
-virtual_scale = 1;
+virtual_scale = global.zoom;
 
-cam = 0;
 view = 0;
+cam = view_get_camera(view);
 bounce_x = -1;
 bounce_y = 1;
 bounce_rot = 1;
@@ -23,12 +23,18 @@ miny =  9999999999;
 maxy = -9999999999;
 game_set_speed(display_get_frequency(), gamespeed_fps);
 
-do_bounce = false; // true;
+do_bounce = false;
 do_rotate = false;
-/*
-var _old_cam = view_get_camera(view);
-if(_old_cam != -1) {
-    msg = "Deleted Camera #" + string(_old_cam);
-    camera_destroy(_old_cam);
+
+// Special for check screen
+if(active == DRAW_MODE.TILEMAP_CHECK) {
+    virtual_scale = 1;
+    do_bounce = false;
+    do_rotate = false;
 }
-*/
+
+if(global.show_debug) {
+    show_debug_overlay(true, false);    
+}
+
+

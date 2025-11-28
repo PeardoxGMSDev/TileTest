@@ -1,11 +1,23 @@
 // Whether to use dynamic tilesets at start (switch over with SPACE)
 enum DRAW_MODE {
     TILEMAP_BUILTIN,
-    TILEMAP_DYNAMIC
+    TILEMAP_CHECK,
+    TILEMAP_DYNAMIC_DRAW,
+    TILEMAP_DYNAMIC_BUFFER
 }
+
 if(!variable_global_exists("active")) {
     global.active = DRAW_MODE.TILEMAP_BUILTIN;
 }
+
+if(!variable_global_exists("zoom")) {
+    global.zoom = 1;
+}
+
+if(!variable_global_exists("show_debug")) {
+    global.show_debug = false;
+}
+
 
 /* 
  * The following is a very basic tileset object
@@ -103,6 +115,18 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
         self.calculate_uvs();
     }
         
+    /// @function get_width
+    /// @description Returns tilemap width (border aware)
+    static get_width = function() {
+        return (self.tile_width * self.columns) + (2 * border) + (2 * self.columns * tile_border_x);
+    }
+    
+    /// @function get_height
+    /// @description Returns tilemap height (border aware)
+    static get_height = function() {
+        return  (self.tile_height * self.rows) + (2 * border) + (2  * self.rows * tile_border_y);
+    }
+    
     /// @function calculate_offsets
     /// @description Calculates tile offsets (border aware)
     static calculate_offsets = function() {
@@ -158,10 +182,10 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
     
     /// @function set_border
     /// @description Sets dynamic tileset to match GMS tileset layout
-    /// @param {Real} tile_border_x - Horizontal size of border aroound tile
-    /// @param {Real} tile_border_y - Vetical size of border aroound tile
-    /// @param {Real} border - Size of border aroound tileset
-    static set_border = function(tile_border_x, tile_border_y, border = 0) {
+    /// @param {Real} [tile_border_x] - Horizontal size of border aroound tile
+    /// @param {Real} [tile_border_y] - Vetical size of border aroound tile
+    /// @param {Real} [border] - Size of border aroound tileset
+    static set_border = function(tile_border_x = 2, tile_border_y = 2, border = 0) {
         var _rv = false;
         if (!sprite_exists(self.sprite)) return _rv;
         if(border < 0) return  _rv;

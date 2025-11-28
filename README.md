@@ -24,6 +24,8 @@ This repo is a simple example in support of the associated [GM Feature Request](
 
 ### Updates
 
+0.4.2 Improve GUI and Keybound Options
+
 0.4.1 Add UVs and make tileset.draw border aware
 
 0.4.0 Match GMS Border tile padding pixel extension
