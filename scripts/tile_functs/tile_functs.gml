@@ -1,13 +1,14 @@
 // Whether to use dynamic tilesets at start (switch over with SPACE)
 enum DRAW_MODE {
-    TILEMAP_BUILTIN,
     TILEMAP_CHECK,
+    TILEMAP_BUILTIN,
     TILEMAP_DYNAMIC_DRAW,
-    TILEMAP_DYNAMIC_BUFFER
+    TILEMAP_DYNAMIC_BUFFER_ROW,
+    TILEMAP_DYNAMIC_BUFFER_STRIP
 }
 
 if(!variable_global_exists("active")) {
-    global.active = DRAW_MODE.TILEMAP_BUILTIN;
+    global.active = DRAW_MODE.TILEMAP_CHECK;
 }
 
 if(!variable_global_exists("zoom")) {
@@ -96,6 +97,7 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
             _tt = tile_count;
         }
         
+        self.ClassName = "tileset";
         self.sprite = sprite;
         self.border_sprite = noone;
         self.tile_width = tile_width;
@@ -301,9 +303,23 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
     }
     
 
+    static free = function() {
+        if(sprite_exists(self.border_sprite)) {
+            sprite_delete(self.border_sprite);
+            show_debug_message("Deleted Border Sprite")
+        }
+        
+        if(is_array(self.offset)) {
+            array_resize(self.offset, 0);
+        }
+        if(is_array(self.uv)) {
+            array_resize(self.uv, 0);
+        }
+    }
 }
 
 function tilemap(width, height) constructor {
+    self.ClassName = "tilemap";
     self.width = width;
     self.height = height;
     self.tiles = array_create(width * height);
@@ -331,8 +347,9 @@ function tilemap(width, height) constructor {
         self.tileset = atileset;
     }    
     
-    static draw = function() {
+    static draw = function(draw_mode = DRAW_MODE.TILEMAP_DYNAMIC_DRAW, left = 0, top = 0, right = 0, bottom = 0) {
         var _count = 0;
+        var _unbound = ((top == 0) && (left == 0) && (bottom == 0) && (right == 0));
         if(self.tileset == noone) return _count;
         // Loop over rows in dynamic tileset
         for(var _y = 0; _y < self.height; _y++) {
@@ -341,11 +358,28 @@ function tilemap(width, height) constructor {
                 var _index = _x + (_y * self.width);
                 var _tile = self.tiles[_index];
                 // Draw the dynamic tile
-                self.tileset.draw_tile(_tile, _x * self.tileset.tile_width, _y  * self.tileset.tile_height);
-                _count++;
+                var _pos_x = _x * self.tileset.tile_width;
+                var _pos_y = _y * self.tileset.tile_height
+                if(_unbound) {
+                    self.tileset.draw_tile(_tile, _pos_x, _pos_y);
+                    _count++;
+                } else {
+                    if(((_pos_x >= (left - self.tileset.tile_width)) && (_pos_y >= (top - self.tileset.tile_height))) && ((_pos_x <= right) && (_pos_y <= bottom))) {
+                        self.tileset.draw_tile(_tile, _pos_x, _pos_y);
+                        _count++;
+                    }
+                }
             }
         }
         return _count;
+    }
+ 
+    static free = function() {
+        self.tileset = noone;
+        if(is_array(self.tiles)) {
+            array_resize(self.tiles, 0);
+        }
+        
     }
 }
 

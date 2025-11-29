@@ -3,6 +3,9 @@ if(keyboard_check(vk_escape)) {
     game_end();
 }
 
+if(keyboard_check_pressed(ord("U"))) {
+    unbound = !unbound;
+}
 
 if(keyboard_check_pressed(ord("D"))) {
     global.show_debug = !global.show_debug;
@@ -38,14 +41,17 @@ if(keyboard_check_pressed(ord("R"))) {
 // Space = Restart in other tile draw mode
 if(keyboard_check(vk_space)) {
     switch (global.active) {
-        case DRAW_MODE.TILEMAP_BUILTIN:
-            global.active = DRAW_MODE.TILEMAP_CHECK
+         case DRAW_MODE.TILEMAP_CHECK:
+            global.active = DRAW_MODE.TILEMAP_BUILTIN;
             break;
-        case DRAW_MODE.TILEMAP_CHECK:
-            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW
+       case DRAW_MODE.TILEMAP_BUILTIN:
+            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
             break;
         case DRAW_MODE.TILEMAP_DYNAMIC_DRAW:
-            global.active = DRAW_MODE.TILEMAP_BUILTIN;
+            global.active = DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW;
+            break;
+        case DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW:
+            global.active = DRAW_MODE.TILEMAP_CHECK;
             break;
     }
 
@@ -94,5 +100,6 @@ var _rot_y = dcos(rot);
 
 var _viewmat = matrix_build_lookat(lookat_x, lookat_y, -10, lookat_x, lookat_y, 0, _rot_x, _rot_y, 0);
 var _projmat = matrix_build_projection_ortho(virtual_width, virtual_height, 1.0, 32000.0);
+// var _projmat = matrix_build_projection_ortho(room_width, room_height, 1.0, 32000.0);
 camera_set_view_mat(cam, _viewmat);
 camera_set_proj_mat(cam, _projmat);

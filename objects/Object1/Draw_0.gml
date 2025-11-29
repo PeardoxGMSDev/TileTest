@@ -6,10 +6,16 @@ if(view_current == view) {
         }
     }
     if(active == DRAW_MODE.TILEMAP_DYNAMIC_DRAW) {
-        tcount = tmap.draw();
+        if(unbound) {
+            tcount = tmap.draw(active);
+        } else {
+            tcount = tmap.draw(active, lookat_x - (virtual_width div 2), lookat_y - (virtual_height div 2), lookat_x + (virtual_width div 2), lookat_y + (virtual_height div 2));
+        }
     } else if(active == DRAW_MODE.TILEMAP_CHECK) {
         draw_sprite(tset.sprite, 0, 0, 40);
         draw_sprite(tset.border_sprite, 0, sprite_get_width(tset.sprite) + 64, 40);
         draw_sprite(gms_16border, 0, sprite_get_width(tset.sprite) + 64 + sprite_get_width(tset.border_sprite) + 64, 40);
-    }    
+    } else if(active == DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW) {
+        tcount = tmap.draw(active);
+    }
 }

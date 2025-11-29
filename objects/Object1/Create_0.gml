@@ -1,6 +1,11 @@
 // Initialise vars
+tset = undefined;
+tmap = undefined;
 tcount = 0;
 active = global.active;
+if(active == DRAW_MODE.TILEMAP_DYNAMIC_DRAW) {
+    show_debug_message("Break");
+}
 msg = "";
 
 lookat_x = 20;
@@ -25,6 +30,8 @@ game_set_speed(display_get_frequency(), gamespeed_fps);
 
 do_bounce = false;
 do_rotate = false;
+
+unbound = false;
 
 // Special for check screen
 if(active == DRAW_MODE.TILEMAP_CHECK) {
