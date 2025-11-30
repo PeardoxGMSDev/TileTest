@@ -15,16 +15,27 @@ if(keyboard_check_pressed(ord("D"))) {
 }
     
 if(keyboard_check_pressed(vk_pageup)) {
-    if(global.zoom < 8) {
-        global.zoom++;
+    if(global.zoom > 1) {
+       if(global.zoom < 8) {
+           //global.zoom++;
+           global.zoom = int64(global.zoom + 1);
+           game_restart();
+       }
+    } else {
+        global.zoom = global.zoom * 2;
         game_restart();
     }
 }
 
 if(keyboard_check_pressed(vk_pagedown)) {
     if(global.zoom > 1) {
-        global.zoom--;
+        global.zoom = int64(global.zoom - 1);
         game_restart();
+    } else {
+        if(global.zoom > (1/8)) {
+            global.zoom = global.zoom / 2;
+            game_restart();
+        }
     }
 }
 
@@ -37,6 +48,20 @@ if(keyboard_check_pressed(ord("R"))) {
         rot = 0;
     }
 }
+
+if(keyboard_check(vk_up)) {
+    lookat_y--;
+}
+if(keyboard_check(vk_down)) {
+    lookat_y++;
+}
+if(keyboard_check(vk_left)) {
+    lookat_x--;
+}
+if(keyboard_check(vk_right)) {
+    lookat_x++;
+}
+
 
 // Space = Restart in other tile draw mode
 if(keyboard_check(vk_space)) {
@@ -81,8 +106,13 @@ if(do_bounce) {
     lookat_y += bounce_y;
 }
 
-lookat_x = clamp(lookat_x, 0, room_width - (virtual_width div 2));
-lookat_y = clamp(lookat_y, 0, room_height - (virtual_height div 2));
+if((virtual_width < room_width) && (room_height < virtual_height)) {
+    lookat_x = clamp(lookat_x, (virtual_width div 2), room_width - (virtual_width div 2));
+    lookat_y = clamp(lookat_y, (virtual_height div 2), room_height - (virtual_height div 2));
+} else {
+    lookat_x = virtual_width div 2;
+    lookat_y = virtual_height div 2;
+}
 
 if(minx > lookat_x) { minx = lookat_x };
 if(maxx < lookat_x) { maxx = lookat_x };

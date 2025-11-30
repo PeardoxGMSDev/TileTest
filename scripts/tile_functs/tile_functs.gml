@@ -302,7 +302,13 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
         return  _rv;
     }
     
-
+    /// @function get_ref
+    /// @description Returns reference to self
+    /// @return {Struct.tileset} 
+    static get_ref = function() {
+        return self;
+    }
+    
     static free = function() {
         if(sprite_exists(self.border_sprite)) {
             sprite_delete(self.border_sprite);
@@ -373,13 +379,49 @@ function tilemap(width, height) constructor {
         }
         return _count;
     }
+    
+    static remap_tiles = function(left = 0, top = 0, right = 0, bottom = 0) {
+        if((right < left) || (bottom < top)) {
+            return false;
+        }
+        if(!is_struct(self.tileset)) {
+            return false;
+        }
+        if(self.tileset.ClassName != "tileset") {
+            return false;
+        }
+
+        var _tset = self.tileset;
+        var _cells_x = _tset.columns;
+        var _cells_y = _tset.rows;
+        var _cell_width = _tset.tile_width;
+        var _cell_height = _tset.tile_height;
+        var _unbound = ((top == 0) && (left == 0) && (bottom == 0) && (right == 0));
+        
+        var _mapped_left = 0;
+        var _mapped_top = 0;
+        var _mapped_right = self.width;
+        var _mapped_bottom = self.height;
+        
+        if(!_unbound) {
+            _mapped_left = floor(left / _cell_width);
+            _mapped_top = floor(top / _cell_height);
+            _mapped_right = floor((right - 1) / _cell_width);
+            _mapped_bottom = floor((bottom - 1) / _cell_height);
+        }
+        _mapped_left = clamp(_mapped_left, 0, self.width);
+        _mapped_top = clamp(_mapped_top, 0, self.height);
+        _mapped_right = clamp(_mapped_right, _mapped_left, self.width - 1);
+        _mapped_bottom = clamp(_mapped_bottom, _mapped_top, self.height - 1);
+
+        return("L: " + string(_mapped_left) + ", T: " + string(_mapped_top) + ", R: " + string(_mapped_right) + ", B: " + string(_mapped_bottom) + ", W: " + string(_mapped_right - _mapped_left) + ", H: " + string(_mapped_bottom - _mapped_top));
+    }                        
  
     static free = function() {
         self.tileset = noone;
         if(is_array(self.tiles)) {
             array_resize(self.tiles, 0);
         }
-        
     }
 }
 

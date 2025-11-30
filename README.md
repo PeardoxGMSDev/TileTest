@@ -24,6 +24,8 @@ This repo is a simple example in support of the associated [GM Feature Request](
 
 ### Updates
 
+0.4.4 Zoom < 1 > 0
+
 0.4.3 Add Bounding Test
 
 0.4.2 Improve GUI and Keybound Options

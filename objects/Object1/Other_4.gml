@@ -15,7 +15,13 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     tset = new tileset(GrassMap49, 64, 64, 7, 7);
     
     var _cell_width = room_width div tset.tile_width;
+    if((room_width mod tset.tile_width) != 0) {
+        _cell_width++;
+    }
     var _cell_height = room_height div tset.tile_height;
+    if((room_height mod tset.tile_height) != 0) {
+        _cell_height++;
+    }
     
     tmap = new tilemap(_cell_width, _cell_height);
     // Loop over rows in dynamic tileset
@@ -37,7 +43,14 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     var lay_id = layer_get_id("Tiles_1");
     var map_id = layer_tilemap_get_id(lay_id);
     var _w = room_width div tilemap_get_tile_width(map_id);
+    if((room_width mod tilemap_get_tile_width(map_id)) != 0) {
+        _w++;
+    }
     var _h = room_height div tilemap_get_tile_height(map_id);
+    if((room_height mod tilemap_get_tile_height(map_id)) != 0) {
+        _h++;
+    }
+    
     tilemap_set_width(map_id, _w);
     tilemap_set_height(map_id, _h);
         
@@ -55,9 +68,13 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
 
 virtual_width = display_get_width() / virtual_scale;
 virtual_height = display_get_height() / virtual_scale;
-
-lookat_x = (room_width div 2) + (virtual_width div 2);
-lookat_y = (room_height div 2) + (virtual_height div 2);
+if((virtual_width < room_width) && (room_height < virtual_height)) {
+    lookat_x = (room_width div 2) + (virtual_width div 2);
+    lookat_y = (room_height div 2) + (virtual_height div 2);
+} else {
+    lookat_x = (virtual_width div 2);
+    lookat_y = (virtual_height div 2);
+}
 
 if(cam != -1) {
     camera_destroy(cam)

@@ -7,8 +7,10 @@ if(view_current == view) {
     }
     if(active == DRAW_MODE.TILEMAP_DYNAMIC_DRAW) {
         if(unbound) {
+            msg = tmap.remap_tiles();
             tcount = tmap.draw(active);
         } else {
+            msg = tmap.remap_tiles(lookat_x - (virtual_width div 2), lookat_y - (virtual_height div 2), lookat_x + (virtual_width div 2), lookat_y + (virtual_height div 2));
             tcount = tmap.draw(active, lookat_x - (virtual_width div 2), lookat_y - (virtual_height div 2), lookat_x + (virtual_width div 2), lookat_y + (virtual_height div 2));
         }
     } else if(active == DRAW_MODE.TILEMAP_CHECK) {
@@ -19,3 +21,7 @@ if(view_current == view) {
         tcount = tmap.draw(active);
     }
 }
+
+draw_set_colour(c_red);
+draw_line(lookat_x, lookat_y - 50, lookat_x ,lookat_y + 50);
+draw_line(lookat_x -50 ,lookat_y, lookat_x + 50 ,lookat_y);
