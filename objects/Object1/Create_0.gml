@@ -1,3 +1,22 @@
+/*
+
+var _t = new stack();
+for(var _i=0; _i < 10; _i++) {
+    _t.push(_i);
+}
+_t.push(10);
+_t.pop();
+for(var _i=9; _i >= 0; _i--) {
+    if(_t.pop() != _i) {
+        throw("Check stack error")
+    }
+}
+show_debug_message("Max Stack = " + string(_t.max_stack));
+
+*/
+
+use_maze = true;
+
 // Initialise vars
 tset = undefined;
 tmap = undefined;

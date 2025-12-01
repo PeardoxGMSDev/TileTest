@@ -106,7 +106,7 @@ if(do_bounce) {
     lookat_y += bounce_y;
 }
 
-if((virtual_width < room_width) && (room_height < virtual_height)) {
+if(virtual_scale >= 1) {
     lookat_x = clamp(lookat_x, (virtual_width div 2), room_width - (virtual_width div 2));
     lookat_y = clamp(lookat_y, (virtual_height div 2), room_height - (virtual_height div 2));
 } else {

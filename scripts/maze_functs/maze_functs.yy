@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"maze_functs",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"maze_functs",
+  "parent":{
+    "name":"TileTest",
+    "path":"TileTest.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
