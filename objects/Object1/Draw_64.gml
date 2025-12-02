@@ -1,4 +1,8 @@
 // Just show some info about performance - fpr_real is the big deal
+// return false;
+if(!do_gui) {
+    exit;
+}
 draw_set_colour(c_black);
 draw_set_alpha(0.66);
 draw_rectangle(10, 10, 420, 210,false);
@@ -48,6 +52,7 @@ if(is_struct(tmap)) {
 }
 
 draw_text(20,160, _switches);
+
 draw_text(20,180, msg);
 
 

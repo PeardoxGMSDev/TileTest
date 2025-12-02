@@ -1,21 +1,3 @@
-/*
-
-var _t = new stack();
-for(var _i=0; _i < 10; _i++) {
-    _t.push(_i);
-}
-_t.push(10);
-_t.pop();
-for(var _i=9; _i >= 0; _i--) {
-    if(_t.pop() != _i) {
-        throw("Check stack error")
-    }
-}
-show_debug_message("Max Stack = " + string(_t.max_stack));
-
-*/
-
-use_maze = true;
 
 // Initialise vars
 tset = undefined;
@@ -35,6 +17,8 @@ virtual_width = 0;
 virtual_height = 0;
 virtual_scale = global.zoom;
 
+amaze = undefined;
+
 view = 0;
 cam = view_get_camera(view);
 bounce_x = -1;
@@ -49,6 +33,7 @@ game_set_speed(display_get_frequency(), gamespeed_fps);
 
 do_bounce = false;
 do_rotate = false;
+do_gui = true;
 
 unbound = false;
 

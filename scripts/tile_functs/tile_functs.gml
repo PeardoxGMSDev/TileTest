@@ -9,6 +9,7 @@ enum DRAW_MODE {
 
 if(!variable_global_exists("active")) {
     global.active = DRAW_MODE.TILEMAP_CHECK;
+    global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
 }
 
 if(!variable_global_exists("zoom")) {

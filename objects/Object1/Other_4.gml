@@ -1,4 +1,7 @@
 // Resize the room to be full screen borderless 
+//room_width = 1280;
+//room_height = 640;
+
 room_width = display_get_width();
 room_height = display_get_height();
 window_enable_borderless_fullscreen(true);
@@ -13,7 +16,8 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     layer_destroy("Tiles_1");
     // Create out own dynamic tileset from the same sprite
     tset = new tileset(GrassMap49, 64, 64, 7, 7);
-    
+//    tset = new tileset(WorldMapNeon, 64, 64, 7, 7);
+
     var _cell_width = room_width div tset.tile_width;
     if((room_width mod tset.tile_width) != 0) {
         _cell_width++;
@@ -22,24 +26,17 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     if((room_height mod tset.tile_height) != 0) {
         _cell_height++;
     }
-    var _maze;
     var _tile;
-    if(use_maze) {
-        _maze = new maze(_cell_width, _cell_height);
-        _maze.add_enclosing_border();
-    }
-    
+    amaze = new growing_tree_maze(_cell_width, _cell_height);
+    amaze.create();
+
     tmap = new tilemap(_cell_width, _cell_height);
     // Loop over rows in dynamic tileset
     for(var _y = 0; _y < _cell_height; _y++) {
     // Loop over columns in dynamic tileset
         for(var _x = 0; _x < _cell_width; _x++) {
     // Pick a tile - here it's the full (extended) set
-            if(use_maze) {
-                _tile = _maze.get_cell_tile(_x, _y);
-            } else {
-                _tile = tcount mod tset.total_tiles;
-            }
+            _tile = amaze.get_cell_tile(_x, _y);
     // Draw the dynamic tile
             tmap.setTile(_x, _y, _tile);
             
@@ -65,20 +62,13 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     tilemap_set_width(map_id, _w);
     tilemap_set_height(map_id, _h);
         
-    var _maze;
     var _tile;
-    if(use_maze) {
-        _maze = new maze(_w, _h);
-        _maze.add_enclosing_border();
-    }
+    amaze = new growing_tree_maze(_w, _h);
+    amaze.create();
     
     for(var _y = 0; _y <  _h; _y++) {
         for(var _x = 0; _x < _w; _x++) {
-            if(use_maze) {
-                _tile = _maze.get_cell_tile(_x, _y);
-            } else {
-                _tile = tcount mod 48;
-            }
+            _tile = amaze.get_cell_tile(_x, _y);
             tilemap_set(map_id, _tile, _x, _y);
             tcount++; 
         } 
@@ -88,8 +78,10 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     surface_resize(application_surface, room_width, room_height);
 }
 
-virtual_width = display_get_width() / virtual_scale;
-virtual_height = display_get_height() / virtual_scale;
+//virtual_width = display_get_width() / virtual_scale;
+//virtual_height = display_get_height() / virtual_scale;
+virtual_width = room_width / virtual_scale;
+virtual_height = room_height / virtual_scale;
 if((virtual_width < room_width) && (room_height < virtual_height)) {
     lookat_x = (room_width div 2) + (virtual_width div 2);
     lookat_y = (room_height div 2) + (virtual_height div 2);

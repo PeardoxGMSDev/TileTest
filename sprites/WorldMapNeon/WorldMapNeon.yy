@@ -1,10 +1,10 @@
 {
   "$GMSprite":"v2",
-  "%Name":"tilevariant",
+  "%Name":"WorldMapNeon",
   "bboxMode":0,
-  "bbox_bottom":255,
+  "bbox_bottom":447,
   "bbox_left":0,
-  "bbox_right":767,
+  "bbox_right":447,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,
@@ -12,16 +12,16 @@
   "edgeFiltering":false,
   "For3D":false,
   "frames":[
-    {"$GMSpriteFrame":"v1","%Name":"635d4b17-6fbf-42b1-8c9c-ffd91d07de07","name":"635d4b17-6fbf-42b1-8c9c-ffd91d07de07","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"31cd46c6-a680-4243-b3b2-5f8bc2ca886c","name":"31cd46c6-a680-4243-b3b2-5f8bc2ca886c","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
   ],
   "gridX":0,
   "gridY":0,
-  "height":256,
+  "height":448,
   "HTile":false,
   "layers":[
-    {"$GMImageLayer":"","%Name":"3db2ce03-5b3e-4b25-ad14-3cfe326a4873","blendMode":0,"displayName":"default","isLocked":false,"name":"3db2ce03-5b3e-4b25-ad14-3cfe326a4873","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
+    {"$GMImageLayer":"","%Name":"a10d5b38-7395-4764-8aff-5e48754df0ec","blendMode":0,"displayName":"default","isLocked":false,"name":"a10d5b38-7395-4764-8aff-5e48754df0ec","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
   ],
-  "name":"tilevariant",
+  "name":"WorldMapNeon",
   "nineSlice":null,
   "origin":0,
   "parent":{
@@ -33,7 +33,7 @@
   "resourceVersion":"2.0",
   "sequence":{
     "$GMSequence":"v1",
-    "%Name":"tilevariant",
+    "%Name":"WorldMapNeon",
     "autoRecord":true,
     "backdropHeight":768,
     "backdropImageOpacity":0.5,
@@ -57,7 +57,7 @@
       "resourceType":"KeyframeStore<MomentsEventKeyframe>",
       "resourceVersion":"2.0",
     },
-    "name":"tilevariant",
+    "name":"WorldMapNeon",
     "playback":1,
     "playbackSpeed":30.0,
     "playbackSpeedType":0,
@@ -69,8 +69,8 @@
     "tracks":[
       {"$GMSpriteFramesTrack":"","builtinName":0,"events":[],"inheritsTrackColour":true,"interpolation":1,"isCreationTrack":false,"keyframes":{"$KeyframeStore<SpriteFrameKeyframe>":"","Keyframes":[
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"635d4b17-6fbf-42b1-8c9c-ffd91d07de07","path":"sprites/tilevariant/tilevariant.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"f0ce6cb0-8a8c-4205-8f4f-cea9fbbe20e5","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"31cd46c6-a680-4243-b3b2-5f8bc2ca886c","path":"sprites/WorldMapNeon/WorldMapNeon.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"9b263182-270e-4d99-ad40-83d990a6deef","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,
@@ -86,5 +86,5 @@
   },
   "type":0,
   "VTile":false,
-  "width":768,
+  "width":448,
 }

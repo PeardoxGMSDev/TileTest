@@ -24,6 +24,8 @@ This repo is a simple example in support of the associated [GM Feature Request](
 
 ### Updates
 
+0.4.6 Growing Tree maze (complete)
+
 0.4.5 Base maze
 
 0.4.4 Zoom < 1 > 0

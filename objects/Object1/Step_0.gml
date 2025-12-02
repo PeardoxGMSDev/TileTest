@@ -7,6 +7,10 @@ if(keyboard_check_pressed(ord("U"))) {
     unbound = !unbound;
 }
 
+if(keyboard_check_pressed(ord("G"))) {
+    do_gui = !do_gui;
+}
+
 if(keyboard_check_pressed(ord("D"))) {
     global.show_debug = !global.show_debug;
     if(global.show_debug) {
@@ -63,27 +67,46 @@ if(keyboard_check(vk_right)) {
 }
 
 
+if(keyboard_check_pressed(vk_f1)) {
+    if(!is_undefined(tmap)) {
+        amaze.create();
+        // Loop over rows in dynamic tileset
+        for(var _y = 0; _y < tmap.height; _y++) {
+        // Loop over columns in dynamic tileset
+            for(var _x = 0; _x < tmap.width; _x++) {
+        // Pick a tile - here it's the full (extended) set
+        // Draw the dynamic tile
+                tmap.setTile(_x, _y, amaze.get_cell_tile(_x, _y));
+            }
+        }
+            
+    }
+    
+}
 // Space = Restart in other tile draw mode
 if(keyboard_check(vk_space)) {
     switch (global.active) {
          case DRAW_MODE.TILEMAP_CHECK:
             global.active = DRAW_MODE.TILEMAP_BUILTIN;
+//            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
             break;
        case DRAW_MODE.TILEMAP_BUILTIN:
             global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
             break;
         case DRAW_MODE.TILEMAP_DYNAMIC_DRAW:
             global.active = DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW;
+//            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
             break;
         case DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW:
             global.active = DRAW_MODE.TILEMAP_CHECK;
+//            global.active = DRAW_MODE.TILEMAP_BUILTIN;
             break;
     }
 
     game_restart();
 }
 
-if(keyboard_check(vk_f1)) {
+if(keyboard_check(vk_f2)) {
     show_debug_message("Break");
 }
 
