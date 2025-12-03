@@ -35,20 +35,20 @@ var _switches = "";
 if(unbound) {
     _switches += "[Unbound]";
 } else {
-    _switches += "         ";
+    _switches += "[       ]";
 }
 if(do_bounce) {
     _switches += "[Bounce]";
 } else {
-    _switches += "        ";
+    _switches += "[      ]";
 }
 if(do_rotate) {
     _switches += "[Rotate]";
 } else {
-    _switches += "        ";
+    _switches += "[      ]";
 }
 if(is_struct(tmap)) {
-    _switches += " | (" + string(tmap.width)+", "+string(tmap.height) + ")";
+    _switches += " | Size (" + string(tmap.width)+", "+string(tmap.height) + ")";
 }
 
 draw_text(20,160, _switches);
@@ -58,12 +58,12 @@ draw_text(20,180, msg);
 
 draw_set_colour(c_black);
 draw_set_alpha(0.66);
-draw_rectangle(10, display_get_gui_height() - 50, 920, display_get_gui_height() - 10,false);
+draw_rectangle(10, display_get_gui_height() - 50, 1240, display_get_gui_height() - 10,false);
 
 draw_set_colour(c_white);
 draw_set_alpha(1);
-draw_rectangle(10, display_get_gui_height() - 50, 920, display_get_gui_height() - 10,true);
+draw_rectangle(10, display_get_gui_height() - 50, 1240, display_get_gui_height() - 10,true);
 draw_set_colour(c_yellow);
 
-draw_text(20, display_get_gui_height() - 40,"PgUp/PgDn = Zoom In/Out, B = Bounce, R = Rotate, Space = Next Scrren, D = Debug Overlay, Esc = Quit");
+draw_text(20, display_get_gui_height() - 40,"PgUp/PgDn = Zoom In/Out, B = Bounce, R = Rotate, Space = Next Scrren, G = GUI Off/On, U = Bound/Unbound, D = Debug Overlay, Esc = Quit");
 

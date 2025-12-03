@@ -23,8 +23,8 @@
   "resourceType":"GMTileSet",
   "resourceVersion":"2.0",
   "spriteId":{
-    "name":"GrassMap49",
-    "path":"sprites/GrassMap49/GrassMap49.yy",
+    "name":"gmsmap",
+    "path":"sprites/gmsmap/gmsmap.yy",
   },
   "spriteNoExport":false,
   "textureGroupId":{

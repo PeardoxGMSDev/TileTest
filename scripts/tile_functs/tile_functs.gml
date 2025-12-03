@@ -7,6 +7,37 @@ enum DRAW_MODE {
     TILEMAP_DYNAMIC_BUFFER_STRIP
 }
 
+bitmap_remap = [
+    [   // Native - Passthru
+         1,  2,  3,  4,  5,  6,  7,  8,
+         9, 10, 11, 12, 13, 14, 15, 16,
+        17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32,
+        33, 34, 35, 36, 37, 38, 39, 40,
+        41, 42, 43, 44, 45, 46, 47, 48
+    ],[ // SBS Floor - 8 x 6
+        35,  37,  32,  23,  31,  45,  44,  15,
+        41,  39,  33,  19,  27,  42,  43,  34,
+         4,   8,  12,   3,  16,  24,  47,  40,
+         2,   1,   6,   9,  20,  28,  46,  36,
+        11,   7,  17,  26,  22,  21,   5,  38,
+        13,  14,  18,  25,  29,  30,  10,   0
+    ],[ // SBS Wall - 8 x 6
+        35,  37,  32,  23,  31,  45,  44,  15,
+        41,  39,  33,  19,  27,  42,  43,  34,
+         4,   8,  12,   3,  16,  24,   0,  40,
+         2,   1,   6,   9,  20,  28,  46,  36,
+        11,   7,  17,  26,  22,  21,   5,  38,
+        13,  14,  18,  25,  29,  30,  10,  47
+    ]
+];
+
+enum BITMAP_LAYOUT {
+    NATIVE,     // 7 x 7 - 48 tile with tile0 transparent
+    SBS_FLOOR,  // 8 x 8 - 48 tile with 1 + 47 as Wall, Floor
+    SBS_WALL    // 8 x 8 - 48 tile with 1 + 47 as Floor, Wall
+}
+
 if(!variable_global_exists("active")) {
     global.active = DRAW_MODE.TILEMAP_CHECK;
     global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
@@ -23,7 +54,7 @@ if(!variable_global_exists("show_debug")) {
 
 /* 
  * The following is a very basic tileset object
- * There are many ways toi iumprove it but for now we're only interested in 
+ * There are many ways to iumprove it but for now we're only interested in 
  * the draw speed as if this is poor then dynamic tilesets are pointless
  */
 
@@ -32,11 +63,86 @@ enum TILE_TEXTURE_DRAW_MODE {
     TRIANGLE_LIST
  }
 
-function draw_set_colour_alpha(c) {
-    draw_set_colour(c);
-    draw_set_alpha((c >> 24) / 255);
-
+/// @function draw_set_colour_alpha
+/// @description Set both colour and alpha from 32bit ARGB
+/// @param {Real} colour
+function draw_set_colour_alpha(colour) {
+    draw_set_colour(colour);
+    draw_set_alpha((colour >> 24) / 255);
 }
+
+
+function load_tileset() {
+    var _fn = get_open_filename("Image File|*.png", "");
+    return _fn;
+}
+
+/// @function load_bitmap
+/// @description Convert tileset bitmap to same layout as GameMaker uses internally
+/// @param {String} bitmap_order BIRMAP_LAYOUT enum
+/// @return {GMAsset.Sprite} New sprite or false
+function load_bitmap(fn) {
+    if(file_exists(fn)) {
+        return sprite_add(fn, 0, false, false, 0, 0);
+    }
+    
+    return false;
+}
+
+/// @function vector_pos
+/// @description Create vector
+/// @param {Real} xpos - Vertical position
+/// @param {Real} ypos - Horizontal position
+function vector_pos(xpos = 0, ypos = 0) constructor {
+    self.xpos = xpos;
+    self.ypos = ypos;
+}
+
+/// @function vector_mapping
+/// @description Create vector mapping
+/// @param {Real} width - Width of each poly
+/// @param {Real} height - Height of each poly
+function vector_mapping(width, height) : vector_pos() constructor {
+    self.width = width;
+    self.height = height;
+    
+    static from_index = function(index) {
+        if((index < 0) || (index >= (self.width * self.height))) {
+            throw("Bad index for vector_mapping.from_index");
+        }
+        self.xpos = index mod self.width;
+        self.ypos = index div self.width;
+    }
+    
+    static set = function(xpos, ypos) {
+        if((xpos < 0) || (xpos >= self.width) || (ypos < 0) || (ypos >= self.height)) {
+            throw("Bad index for vector_mapping.from_index");
+        }
+        self.xpos = xpos;
+        self.ypos = ypos;
+    }
+    
+    static move = function(direction) {
+        switch(direction) {
+            case FaceDirection.EAST:
+                self.xpos++;
+                break;
+            case FaceDirection.WEST:
+                self.xpos--;
+                break;
+            case FaceDirection.NORTH:
+                self.ypos--;
+                break;
+            case FaceDirection.SOUTH:
+                self.ypos++;
+                break;
+            default:
+                throw("Bad direction for vector_mapping.move");
+                break;
+            }
+    }
+}
+
 
 /// @function tileset_data
 /// @description Tileset data
@@ -117,6 +223,38 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
         self.calculate_offsets();
         self.calculate_uvs();
     }
+    
+    static set_sprite = function(sprite, layout = BITMAP_LAYOUT.NATIVE) {
+        if(sprite_exists(self.sprite)) {
+            sprite_delete(self.sprite);
+        }
+        if(sprite_exists(self.border_sprite)) {
+            sprite_delete(self.border_sprite);
+        }
+        self.sprite = sprite;
+        self.border_sprite = noone;
+        self.calculate_offsets();
+        self.calculate_uvs();
+        self.set_border();
+        switch(layout) {
+            case BITMAP_LAYOUT.NATIVE: 
+                self.tile_width = sprite_get_width(self.sprite) div 7; // sbdbg - fixme
+                self.tile_height = sprite_get_width(self.sprite) div 7; // sbdbg - fixme
+                break;
+            case BITMAP_LAYOUT.SBS_FLOOR:
+                self.tile_width = sprite_get_width(self.sprite) div 8; // sbdbg - fixme
+                self.tile_height = sprite_get_width(self.sprite) div 6; // sbdbg - fixme
+                break;
+            case BITMAP_LAYOUT.SBS_WALL:
+                self.tile_width = sprite_get_width(self.sprite) div 8; // sbdbg - fixme
+                self.tile_height = sprite_get_width(self.sprite) div 6; // sbdbg - fixme
+                break;
+            default:
+                throw("Bad bitmap size in set_sprite");
+                break;
+                
+        }
+    }
         
     /// @function get_width
     /// @description Returns tilemap width (border aware)
@@ -176,6 +314,9 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
                 self.tile_width, self.tile_height,
                 x, y);
         } else {
+            if(global.break_on_true) {
+                show_debug_message("break");
+            }
             draw_sprite_part(self.sprite, 0, 
                 o.left, o.top,
                 self.tile_width, self.tile_height,
@@ -184,34 +325,49 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
     }
     
     /// @function set_border
-    /// @description Sets dynamic tileset to match GMS tileset layout
+    /// @description Sets tilemap border used by convert_bitmap
     /// @param {Real} [tile_border_x] - Horizontal size of border aroound tile
     /// @param {Real} [tile_border_y] - Vetical size of border aroound tile
     /// @param {Real} [border] - Size of border aroound tileset
+    /// @return {bool} Succes flag (true if it changed anything)
     static set_border = function(tile_border_x = 2, tile_border_y = 2, border = 0) {
         var _rv = false;
         if (!sprite_exists(self.sprite)) return _rv;
         if(border < 0) return  _rv;
         if(tile_border_x < 0) return  _rv;
         if(tile_border_y < 0) return  _rv;
-        if(self.has_border) return  _rv;
+        if(self.has_border) return  _rv; 
+        self.tile_border_x = tile_border_x;
+        self.tile_border_y = tile_border_y;
+        self.border = border;
+        self.has_border = true;
+        
+        return true;
+    }
+    
+    /// @function convert_bitmap
+    /// @description Convert tileset bitmap to same layout as GameMaker uses internally
+    /// @param {Real} bitmap_order BIRMAP_LAYOUT enum
+    /// @return {bool} Succes flag (true if it changed anything)
+    static convert_bitmap = function(bitmap_order = BITMAP_LAYOUT.NATIVE) {
+        var _rv = false;
+        if (!sprite_exists(self.sprite)) return _rv;
 
         var _width = sprite_get_width(self.sprite) + (2 * border) + (2 * self.columns * tile_border_x);
         var _height = sprite_get_height(self.sprite) + (2 * border) + (2  * self.rows * tile_border_y);
         var _surf = surface_create(_width, _height);
         try {    
-            self.tile_border_x = tile_border_x;
-            self.tile_border_y = tile_border_y;
-            self.border = border;
-            
             surface_set_target(_surf);
             draw_clear_alpha(c_black, 0);
             
             var _ox = self.tile_border_x + self.tile_width;
             var _oy = self.tile_border_y + self.tile_height;
-    
-            for(var _y = 0; _y < self.rows; _y++) {
-                for(var _x = 0; _x < self.columns; _x++) {
+            
+            for(var _ypos = 0; _ypos < self.rows; _ypos++) {
+                for(var _xpos = 0; _xpos < self.columns; _xpos++) {
+                    var _x = _xpos;
+                    var _y = _ypos;
+                    show_debug_message("X = " + string(_x) + "Y = " + string(_y));
                     // Copy sprite to new position
                     draw_sprite_part(self.sprite, 0, 
                         (_x * self.tile_width), (_y * self.tile_height),
@@ -279,12 +435,11 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
                     draw_set_colour_alpha(_c_br);
                     draw_rectangle(_lx + _ox - self.tile_border_x, _ly + _oy - self.tile_border_y, _lx + _ox , _ly + _oy, false);
                     draw_set_alpha(1.0);
-            }
+                }
     
             }
             
             self.border_sprite = sprite_create_from_surface(_surf, 0, 0, _width, _height, false, false, 0, 0);
-            self.has_border = true;
 // sprite_save(self.border_sprite, 0, "C:\\video\\check.png")            
             // Recalculate offsets + uvs with borders
             self.calculate_offsets();

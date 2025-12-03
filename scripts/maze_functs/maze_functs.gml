@@ -1,4 +1,5 @@
-global.maze_default_wall = [
+
+maze_default_wall = [
       -1,   0,   8,   2,  // 0 = 3
       10, 128, 136, 130,  // 4 - 7
      138,  32,  40,  34,  // 8 - 11
@@ -10,7 +11,7 @@ global.maze_default_wall = [
      234, 187, 238,  62,  // 32 - 35
      190, 143, 175, 227,  // 36 - 39
      235, 248, 250, 191,  // 40 - 43
-     254, 251, 239, 255   // 44 - 47
+     254, 251, 239, 255, 511   // 44 - 47
     ];
 
 enum FaceDirection { NONE = -1, EAST, NORTHEAST, NORTH, NORTHWEST, WEST, SOUTHWEST, SOUTH, SOUTHEAST };
@@ -35,6 +36,8 @@ enum CompassPointBitmapAND {
     SOUTHEAST = 0x7F
 };
 
+break_on_true = false;
+
 function __bsearch(_array, _value, _compare) {
     var _l = 0;
     var _r = array_length(_array) - 1;
@@ -49,52 +52,6 @@ function __bsearch(_array, _value, _compare) {
         }
     }
     return -1;
-}
-
-function maze_position(xpos = 0, ypos = 0) constructor {
-    self.xpos = xpos;
-    self.ypos = ypos;
-}
-
-function maze_cell(width, height) : maze_position() constructor {
-    self.width = width;
-    self.height = height;
-    
-    static from_index = function(index) {
-        if((index < 0) || (index >= (self.width * self.height))) {
-            throw("Bad index for maze_cell.from_index");
-        }
-        self.xpos = index mod self.width;
-        self.ypos = index div self.width;
-    }
-    
-    static set = function(xpos, ypos) {
-        if((xpos < 0) || (xpos >= self.width) || (ypos < 0) || (ypos >= self.height)) {
-            throw("Bad index for maze_cell.from_index");
-        }
-        self.xpos = xpos;
-        self.ypos = ypos;
-    }
-    
-    static move = function(direction) {
-        switch(direction) {
-            case FaceDirection.EAST:
-                self.xpos++;
-                break;
-            case FaceDirection.WEST:
-                self.xpos--;
-                break;
-            case FaceDirection.NORTH:
-                self.ypos--;
-                break;
-            case FaceDirection.SOUTH:
-                self.ypos++;
-                break;
-            default:
-                throw("Bad direction for maze_cell.move");
-                break;
-            }
-    }
 }
 
 function binary_tile(tile = undefined, bits = undefined) constructor {
@@ -370,6 +327,7 @@ function maze(width, height, default_tile = 1, capacity = 0) constructor {
 }
      
 function growing_tree_maze(width, height, default_tile = 1, capacity = 0) :  maze(width, height, default_tile, capacity) constructor {
+    self.start = undefined;
     static pick_exit = function(cell) {
         var _exits = new stack();
         if(cell.ypos < self.height - 1) {
@@ -411,6 +369,7 @@ function growing_tree_maze(width, height, default_tile = 1, capacity = 0) :  maz
         }
         
         var _all_wall = self.bitmap.bsearch($FF);
+        var _blocking = self.bitmap.bsearch($1FF);
         if(seed == 0) {
             randomise();
             //random_set_seed(148905283);
@@ -421,10 +380,12 @@ function growing_tree_maze(width, height, default_tile = 1, capacity = 0) :  maz
         }
         show_debug_message("Seed = " + string(self.seed));
         
-        var _cell = new maze_cell(self.width, self.height);        
+        var _cell = new vector_mapping(self.width, self.height);        
         if(self.stack.isempty()) {
-            _cell.from_index(irandom(_mazesize - 1));
-            self.stack.push(new maze_position(_cell.xpos,_cell.ypos));
+//            _cell.from_index(irandom(_mazesize - 1));
+            _cell.from_index(_mazesize - 1);
+            self.start = new vector_pos(_cell.xpos,_cell.ypos);
+            self.stack.push(new vector_pos(_cell.xpos,_cell.ypos));
         } else {
             var _tos = self.stack.peek();
             _cell.set(_tos.xpos, _tos.ypos);
@@ -468,7 +429,7 @@ function growing_tree_maze(width, height, default_tile = 1, capacity = 0) :  maz
                         throw("Bad Direction in growinto_tree_maze.create");
                         break;
                 }
-                self.stack.push(new maze_position(_cell.xpos,_cell.ypos));
+                self.stack.push(new vector_pos(_cell.xpos,_cell.ypos));
             }
            
         }

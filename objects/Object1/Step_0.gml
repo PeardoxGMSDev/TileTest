@@ -3,6 +3,22 @@ if(keyboard_check(vk_escape)) {
     game_end();
 }
 
+if(keyboard_check_pressed(ord("F"))) {
+    if(global.active != DRAW_MODE.TILEMAP_BUILTIN) {
+       var _fn = load_tileset();
+       if(_fn != "") {
+            var _spr = load_bitmap(_fn);
+            if(_spr) {
+                if(sprite_exists(tset.sprite)) {
+                    tset.set_sprite(_spr, BITMAP_LAYOUT.NATIVE); //SBS_FLOOR);
+                    tset.convert_bitmap(BITMAP_LAYOUT.NATIVE); //SBS_FLOOR);
+                    global.break_on_true = true;
+                }
+            }
+       }
+    }
+}
+
 if(keyboard_check_pressed(ord("U"))) {
     unbound = !unbound;
 }

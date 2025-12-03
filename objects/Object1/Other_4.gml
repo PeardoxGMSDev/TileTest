@@ -7,7 +7,6 @@ room_height = display_get_height();
 window_enable_borderless_fullscreen(true);
 window_set_fullscreen(true);
 
-
 // Rewrite the tilemap so it matches the dynamic one we're testing
 tcount = 0;
 
@@ -16,7 +15,9 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     layer_destroy("Tiles_1");
     // Create out own dynamic tileset from the same sprite
     tset = new tileset(GrassMap49, 64, 64, 7, 7);
-//    tset = new tileset(WorldMapNeon, 64, 64, 7, 7);
+//    tset = new tileset(gmsmap, 64, 64, 7, 7);
+    tset.convert_bitmap(BITMAP_LAYOUT.NATIVE);
+
 
     var _cell_width = room_width div tset.tile_width;
     if((room_width mod tset.tile_width) != 0) {
