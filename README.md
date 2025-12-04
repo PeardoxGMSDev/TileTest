@@ -24,6 +24,8 @@ This repo is a simple example in support of the associated [GM Feature Request](
 
 ### Updates
 
+0.4.8 Loadable texture support (64x64 only)
+
 0.4.7 Partial loadable texture support
 
 0.4.6 Growing Tree maze (complete)

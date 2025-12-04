@@ -3,15 +3,16 @@ if(keyboard_check(vk_escape)) {
     game_end();
 }
 
-if(keyboard_check_pressed(ord("F"))) {
+if(keyboard_check_pressed(ord("L"))) {
     if(global.active != DRAW_MODE.TILEMAP_BUILTIN) {
        var _fn = load_tileset();
        if(_fn != "") {
             var _spr = load_bitmap(_fn);
             if(_spr) {
                 if(sprite_exists(tset.sprite)) {
-                    tset.set_sprite(_spr, BITMAP_LAYOUT.NATIVE); //SBS_FLOOR);
-                    tset.convert_bitmap(BITMAP_LAYOUT.NATIVE); //SBS_FLOOR);
+                    var _layout = BITMAP_LAYOUT.GMS_WORLD; // SBS_FLOOR
+                    tset.set_sprite(_spr, _layout);
+                    tset.convert_bitmap(_layout);
                     global.break_on_true = true;
                 }
             }
@@ -31,6 +32,8 @@ if(keyboard_check_pressed(ord("D"))) {
     global.show_debug = !global.show_debug;
     if(global.show_debug) {
         show_debug_overlay(true, false);    
+    } else {
+        show_debug_overlay(false, false);    
     }
 }
     
@@ -103,19 +106,19 @@ if(keyboard_check_pressed(vk_f1)) {
 if(keyboard_check(vk_space)) {
     switch (global.active) {
          case DRAW_MODE.TILEMAP_CHECK:
-            global.active = DRAW_MODE.TILEMAP_BUILTIN;
-//            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
+//            global.active = DRAW_MODE.TILEMAP_BUILTIN;
+            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
             break;
        case DRAW_MODE.TILEMAP_BUILTIN:
             global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
             break;
         case DRAW_MODE.TILEMAP_DYNAMIC_DRAW:
-            global.active = DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW;
-//            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
+//            global.active = DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW;
+            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
             break;
         case DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW:
-            global.active = DRAW_MODE.TILEMAP_CHECK;
-//            global.active = DRAW_MODE.TILEMAP_BUILTIN;
+//            global.active = DRAW_MODE.TILEMAP_CHECK;
+            global.active = DRAW_MODE.TILEMAP_BUILTIN;
             break;
     }
 

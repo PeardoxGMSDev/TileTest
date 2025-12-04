@@ -14,8 +14,8 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     // Don't need a Tileset so delete the layer measning it won't be drawn
     layer_destroy("Tiles_1");
     // Create out own dynamic tileset from the same sprite
-    tset = new tileset(GrassMap49, 64, 64, 7, 7);
-//    tset = new tileset(gmsmap, 64, 64, 7, 7);
+//    tset = new tileset(GrassMap49, 64, 64, 7, 7);
+    tset = new tileset(gmsmap, 64, 64, 7, 7);
     tset.convert_bitmap(BITMAP_LAYOUT.NATIVE);
 
 

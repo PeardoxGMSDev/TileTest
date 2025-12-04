@@ -43,9 +43,3 @@ if(active == DRAW_MODE.TILEMAP_CHECK) {
     do_bounce = false;
     do_rotate = false;
 }
-
-if(global.show_debug) {
-    show_debug_overlay(true, false);    
-}
-
-

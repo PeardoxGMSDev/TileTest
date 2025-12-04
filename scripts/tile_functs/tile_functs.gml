@@ -7,6 +7,18 @@ enum DRAW_MODE {
     TILEMAP_DYNAMIC_BUFFER_STRIP
 }
 
+layout_consts = [
+    {   // Native - Passthru
+        width: 7, height: 7, tiles: 48
+    },{ // SBS Floor - 8 x 6
+        width: 8, height: 6, tiles: 48
+    },{ // SBS Wall - 8 x 6
+        width: 8, height: 6, tiles: 47
+    },{ // GMS World - 8 x 6
+        width: 8, height: 6, tiles: 48
+    }
+];
+
 bitmap_remap = [
     [   // Native - Passthru
          1,  2,  3,  4,  5,  6,  7,  8,
@@ -16,30 +28,39 @@ bitmap_remap = [
         33, 34, 35, 36, 37, 38, 39, 40,
         41, 42, 43, 44, 45, 46, 47, 48
     ],[ // SBS Floor - 8 x 6
-        35,  37,  32,  23,  31,  45,  44,  15,
-        41,  39,  33,  19,  27,  42,  43,  34,
-         4,   8,  12,   3,  16,  24,  47,  40,
-         2,   1,   6,   9,  20,  28,  46,  36,
-        11,   7,  17,  26,  22,  21,   5,  38,
-        13,  14,  18,  25,  29,  30,  10,   0
+        36,  38,  33,  24,  32,  46,  45,  16,
+        42,  40,  34,  20,  28,  43,  44,  35,
+         5,   9,  13,   4,  17,  25,  48,  41,
+         3,   2,   7,  10,  21,  29,  47,  37,
+        12,   8,  18,  27,  23,  22,   6,  39,
+        14,  15,  19,  26,  30,  31,  11,   1 
     ],[ // SBS Wall - 8 x 6
-        35,  37,  32,  23,  31,  45,  44,  15,
-        41,  39,  33,  19,  27,  42,  43,  34,
-         4,   8,  12,   3,  16,  24,   0,  40,
-         2,   1,   6,   9,  20,  28,  46,  36,
-        11,   7,  17,  26,  22,  21,   5,  38,
-        13,  14,  18,  25,  29,  30,  10,  47
+        36,  38,  33,  24,  32,  46,  45,  16,
+        42,  40,  34,  20,  28,  43,  44,  35,
+         5,   9,  13,   4,  17,  25,   1,  41,
+         3,   2,   7,  10,  21,  29,  47,  37,
+        12,   8,  18,  27,  23,  22,   6,  39,
+        14,  15,  19,  26,  30,  31,  11,  48    
+    ],[
+         1,  2,  3,  4,  5,  6,  7,  8,
+         9, 10, 11, 12, 13, 14, 15, 16,
+        17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32,
+        33, 34, 35, 36, 37, 38, 39, 40,
+        41, 42, 43, 44, 45, 46, 47, 48
     ]
+    
 ];
 
 enum BITMAP_LAYOUT {
     NATIVE,     // 7 x 7 - 48 tile with tile0 transparent
     SBS_FLOOR,  // 8 x 8 - 48 tile with 1 + 47 as Wall, Floor
-    SBS_WALL    // 8 x 8 - 48 tile with 1 + 47 as Floor, Wall
+    SBS_WALL,   // 8 x 8 - 48 tile with 1 + 47 as Floor, Wall
+    GMS_WORLD
 }
 
 if(!variable_global_exists("active")) {
-    global.active = DRAW_MODE.TILEMAP_CHECK;
+//    global.active = DRAW_MODE.TILEMAP_CHECK;
     global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
 }
 
@@ -225,35 +246,14 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
     }
     
     static set_sprite = function(sprite, layout = BITMAP_LAYOUT.NATIVE) {
-        if(sprite_exists(self.sprite)) {
-            sprite_delete(self.sprite);
-        }
         if(sprite_exists(self.border_sprite)) {
             sprite_delete(self.border_sprite);
         }
         self.sprite = sprite;
         self.border_sprite = noone;
+        self.set_border();
         self.calculate_offsets();
         self.calculate_uvs();
-        self.set_border();
-        switch(layout) {
-            case BITMAP_LAYOUT.NATIVE: 
-                self.tile_width = sprite_get_width(self.sprite) div 7; // sbdbg - fixme
-                self.tile_height = sprite_get_width(self.sprite) div 7; // sbdbg - fixme
-                break;
-            case BITMAP_LAYOUT.SBS_FLOOR:
-                self.tile_width = sprite_get_width(self.sprite) div 8; // sbdbg - fixme
-                self.tile_height = sprite_get_width(self.sprite) div 6; // sbdbg - fixme
-                break;
-            case BITMAP_LAYOUT.SBS_WALL:
-                self.tile_width = sprite_get_width(self.sprite) div 8; // sbdbg - fixme
-                self.tile_height = sprite_get_width(self.sprite) div 6; // sbdbg - fixme
-                break;
-            default:
-                throw("Bad bitmap size in set_sprite");
-                break;
-                
-        }
     }
         
     /// @function get_width
@@ -314,9 +314,6 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
                 self.tile_width, self.tile_height,
                 x, y);
         } else {
-            if(global.break_on_true) {
-                show_debug_message("break");
-            }
             draw_sprite_part(self.sprite, 0, 
                 o.left, o.top,
                 self.tile_width, self.tile_height,
@@ -352,9 +349,9 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
     static convert_bitmap = function(bitmap_order = BITMAP_LAYOUT.NATIVE) {
         var _rv = false;
         if (!sprite_exists(self.sprite)) return _rv;
-
-        var _width = sprite_get_width(self.sprite) + (2 * border) + (2 * self.columns * tile_border_x);
-        var _height = sprite_get_height(self.sprite) + (2 * border) + (2  * self.rows * tile_border_y);
+        
+        var _width = (global.layout_consts[BITMAP_LAYOUT.NATIVE].width * self.tile_width) + (2 * border) + (2 * global.layout_consts[BITMAP_LAYOUT.NATIVE].width * tile_border_x);
+        var _height = (global.layout_consts[BITMAP_LAYOUT.NATIVE].width * self.tile_height) + (2 * border) + (2  * global.layout_consts[BITMAP_LAYOUT.NATIVE].height * tile_border_y);
         var _surf = surface_create(_width, _height);
         try {    
             surface_set_target(_surf);
@@ -363,84 +360,86 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
             var _ox = self.tile_border_x + self.tile_width;
             var _oy = self.tile_border_y + self.tile_height;
             
-            for(var _ypos = 0; _ypos < self.rows; _ypos++) {
-                for(var _xpos = 0; _xpos < self.columns; _xpos++) {
-                    var _x = _xpos;
-                    var _y = _ypos;
-                    show_debug_message("X = " + string(_x) + "Y = " + string(_y));
-                    // Copy sprite to new position
+            for(var _index = 0; _index < global.layout_consts[bitmap_order].tiles; _index++) {
+                var _src_map = new vector_mapping(global.layout_consts[bitmap_order].width, global.layout_consts[bitmap_order].height);
+                var _dst_map = new vector_mapping(global.layout_consts[BITMAP_LAYOUT.NATIVE].width, global.layout_consts[BITMAP_LAYOUT.NATIVE].height);
+                var _remapped = global.bitmap_remap[bitmap_order][_index];
+                _src_map.from_index(_index);
+                _dst_map.from_index(_remapped);
+
+                // Copy sprite to new position
+                draw_sprite_part(self.sprite, 0, 
+                    (_src_map.xpos * self.tile_width), (_src_map.ypos * self.tile_height),
+                    self.tile_width, self.tile_height,
+                    (_dst_map.xpos * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x, 
+                    (_dst_map.ypos * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y);
+                    
+                var _c_tl = surface_getpixel_ext(_surf,(_dst_map.xpos * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x, 
+                    (_dst_map.ypos * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y);
+                var _c_tr = surface_getpixel_ext(_surf,(_dst_map.xpos * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x + self.tile_width - 1, 
+                    (_dst_map.ypos * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y);
+                var _c_bl = surface_getpixel_ext(_surf,(_dst_map.xpos * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x, 
+                    (_dst_map.ypos * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y + self.tile_height - 1);
+                var _c_br = surface_getpixel_ext(_surf,(_dst_map.xpos * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x + self.tile_width - 1, 
+                    (_dst_map.ypos * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y + self.tile_height - 1);
+                                
+                // Extend tile border left
+                for(var _b = 0; _b < self.tile_border_x; _b++) {
                     draw_sprite_part(self.sprite, 0, 
-                        (_x * self.tile_width), (_y * self.tile_height),
-                        self.tile_width, self.tile_height,
-                        (_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x, 
-                        (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y);
-                        
-                    var _c_tl = surface_getpixel_ext(_surf,(_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x, 
-                        (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y);
-                    var _c_tr = surface_getpixel_ext(_surf,(_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x + self.tile_width - 1, 
-                        (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y);
-                    var _c_bl = surface_getpixel_ext(_surf,(_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x, 
-                        (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y + self.tile_height - 1);
-                    var _c_br = surface_getpixel_ext(_surf,(_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x + self.tile_width - 1, 
-                        (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y + self.tile_height - 1);
-                                    
-                    // Extend tile border left
-                    for(var _b = 0; _b < self.tile_border_x; _b++) {
-                        draw_sprite_part(self.sprite, 0, 
-                            (_x * self.tile_width), (_y * self.tile_height),
-                            1, self.tile_height,
-                            (_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x -1 - _b, 
-                            (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y);
-                    }
-            
-                    // Extend tile border right
-                    for(var _b = 0; _b < self.tile_border_x; _b++) {
-                        draw_sprite_part(self.sprite, 0, 
-                            (_x * self.tile_width) + self.tile_width - 1, (_y * self.tile_height),
-                            1, self.tile_height,
-                            (_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x + self.tile_width + _b, 
-                            (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y);
-                    }
-            
-                    // Extend tile border top
-                    for(var _b = 0; _b < self.tile_border_x; _b++) {
-                        draw_sprite_part(self.sprite, 0, 
-                            (_x * self.tile_width), (_y * self.tile_height),
-                            self.tile_width, 1,
-                            (_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x, 
-                            (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y -1 - _b);
-                    }
-            
-                    // Extend tile border bottom
-                    for(var _b = 0; _b < self.tile_border_x; _b++) {
-                        draw_sprite_part(self.sprite, 0, 
-                            (_x * self.tile_width), (_y * self.tile_height) + self.tile_height - 1,
-                            self.tile_width, 1,
-                            (_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x, 
-                            (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y  + self.tile_height + _b);
-                    }
-    
-                        var _lx = (_x * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x;
-                        var _ly = (_y * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y;
-                    
-                    draw_set_colour_alpha(_c_tl);
-                    draw_rectangle(_lx - self.tile_border_x, _ly - self.tile_border_y, _lx, _ly, false);
-                    
-                    draw_set_colour_alpha(_c_tr);
-                    draw_rectangle(_lx + _ox - self.tile_border_x, _ly - self.tile_border_y, _lx + _ox , _ly, false);
-                        
-                    draw_set_colour_alpha(_c_bl);
-                    draw_rectangle(_lx - self.tile_border_x, _ly + _oy - self.tile_border_y, _lx, _ly + _oy, false);
-                        
-                    draw_set_colour_alpha(_c_br);
-                    draw_rectangle(_lx + _ox - self.tile_border_x, _ly + _oy - self.tile_border_y, _lx + _ox , _ly + _oy, false);
-                    draw_set_alpha(1.0);
+                        (_src_map.xpos * self.tile_width), (_src_map.ypos * self.tile_height),
+                        1, self.tile_height,
+                        (_dst_map.xpos * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x -1 - _b, 
+                        (_dst_map.ypos * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y);
                 }
-    
+        
+                // Extend tile border right
+                for(var _b = 0; _b < self.tile_border_x; _b++) {
+                    draw_sprite_part(self.sprite, 0, 
+                        (_src_map.xpos * self.tile_width) + self.tile_width - 1, (_src_map.ypos * self.tile_height),
+                        1, self.tile_height,
+                        (_dst_map.xpos * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x + self.tile_width + _b, 
+                        (_dst_map.ypos * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y);
+                }
+        
+                // Extend tile border top
+                for(var _b = 0; _b < self.tile_border_x; _b++) {
+                    draw_sprite_part(self.sprite, 0, 
+                        (_src_map.xpos * self.tile_width), (_src_map.ypos * self.tile_height),
+                        self.tile_width, 1,
+                        (_dst_map.xpos * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x, 
+                        (_dst_map.ypos * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y -1 - _b);
+                }
+        
+                // Extend tile border bottom
+                for(var _b = 0; _b < self.tile_border_x; _b++) {
+                    draw_sprite_part(self.sprite, 0, 
+                        (_src_map.xpos * self.tile_width), (_src_map.ypos * self.tile_height) + self.tile_height - 1,
+                        self.tile_width, 1,
+                        (_dst_map.xpos * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x, 
+                        (_dst_map.ypos * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y  + self.tile_height + _b);
+                }
+
+                var _lx = (_dst_map.xpos * (self.tile_width + (2 * self.tile_border_x))) + self.border + self.tile_border_x;
+                var _ly = (_dst_map.ypos * (self.tile_height + (2 * self.tile_border_y))) + self.border + self.tile_border_y;
+                
+                draw_set_colour_alpha(_c_tl);
+                draw_rectangle(_lx - self.tile_border_x, _ly - self.tile_border_y, _lx, _ly, false);
+                
+                draw_set_colour_alpha(_c_tr);
+                draw_rectangle(_lx + _ox - self.tile_border_x, _ly - self.tile_border_y, _lx + _ox , _ly, false);
+                    
+                draw_set_colour_alpha(_c_bl);
+                draw_rectangle(_lx - self.tile_border_x, _ly + _oy - self.tile_border_y, _lx, _ly + _oy, false);
+                    
+                draw_set_colour_alpha(_c_br);
+                draw_rectangle(_lx + _ox - self.tile_border_x, _ly + _oy - self.tile_border_y, _lx + _ox , _ly + _oy, false);
+                draw_set_alpha(1.0);
             }
+
+            
             
             self.border_sprite = sprite_create_from_surface(_surf, 0, 0, _width, _height, false, false, 0, 0);
-// sprite_save(self.border_sprite, 0, "C:\\video\\check.png")            
+// sprite_save(self.border_sprite, 0, "C:\\video\\new_texture.png")            
             // Recalculate offsets + uvs with borders
             self.calculate_offsets();
             self.calculate_uvs();
@@ -468,7 +467,6 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
     static free = function() {
         if(sprite_exists(self.border_sprite)) {
             sprite_delete(self.border_sprite);
-            show_debug_message("Deleted Border Sprite")
         }
         
         if(is_array(self.offset)) {
