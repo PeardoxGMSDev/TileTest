@@ -23,7 +23,6 @@
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
     {"id":{"name":"maze_functs","path":"scripts/maze_functs/maze_functs.yy",},},
     {"id":{"name":"tile_functs","path":"scripts/tile_functs/tile_functs.yy",},},
-    {"id":{"name":"filler","path":"sprites/filler/filler.yy",},},
     {"id":{"name":"gms_16border","path":"sprites/gms_16border/gms_16border.yy",},},
     {"id":{"name":"gmsmap","path":"sprites/gmsmap/gmsmap.yy",},},
     {"id":{"name":"GrassMap49","path":"sprites/GrassMap49/GrassMap49.yy",},},

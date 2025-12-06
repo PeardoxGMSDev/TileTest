@@ -18,7 +18,9 @@ if(active == DRAW_MODE.TILEMAP_DYNAMIC_DRAW) {
 } else if (active == DRAW_MODE.TILEMAP_BUILTIN) {
     draw_text(20, 40, "Tiles = " + string(tcount) + " (Tilemap Tiles) (47 set)");    
 } else if (active == DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW) {
-    draw_text(20, 40, "Tiles = " + string(tcount) + " (Dynamic Buffer (Row) (48 set)");    
+    draw_text(20, 40, "Buf = " + string(tcount) + " (Dynamic Buffer (Row) (48 set)");    
+} else if (active == DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_STRIP) {
+    draw_text(20, 40, "Buf = " + string(tcount) + " (Dynamic Buffer (Strip) (48 set)");
 } else if (active == DRAW_MODE.TILEMAP_CHECK) {
     draw_text(20, 40, "Tiles = N/A (Tilemap Check)");    
     draw_text(0, sprite_get_height(GrassMap49) + 64, "Builtin Tilemap");

@@ -14,8 +14,8 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     // Don't need a Tileset so delete the layer measning it won't be drawn
     layer_destroy("Tiles_1");
     // Create out own dynamic tileset from the same sprite
-//    tset = new tileset(GrassMap49, 64, 64, 7, 7);
-    tset = new tileset(gmsmap, 64, 64, 7, 7);
+//    tset = new virtual_tileset(GrassMap49, 64, 64, 7, 7);
+    tset = new virtual_tileset(global.tileset_sprite, 64, 64, 7, 7);
     tset.convert_bitmap(BITMAP_LAYOUT.NATIVE);
 
 
@@ -29,9 +29,9 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
     }
     var _tile;
     amaze = new growing_tree_maze(_cell_width, _cell_height);
-    amaze.create();
+    amaze.create(123);
 
-    tmap = new tilemap(_cell_width, _cell_height);
+    tmap = new virtual_tilemap(_cell_width, _cell_height);
     // Loop over rows in dynamic tileset
     for(var _y = 0; _y < _cell_height; _y++) {
     // Loop over columns in dynamic tileset
@@ -65,7 +65,7 @@ if(active != DRAW_MODE.TILEMAP_BUILTIN) {
         
     var _tile;
     amaze = new growing_tree_maze(_w, _h);
-    amaze.create();
+    amaze.create(123);
     
     for(var _y = 0; _y <  _h; _y++) {
         for(var _x = 0; _x < _w; _x++) {
@@ -104,3 +104,5 @@ view_enabled = true;
 view_set_visible(view, true);
 view_set_wport(view, virtual_width);
 view_set_hport(view, virtual_height);
+
+

@@ -36,8 +36,6 @@ enum CompassPointBitmapAND {
     SOUTHEAST = 0x7F
 };
 
-break_on_true = false;
-
 function __bsearch(_array, _value, _compare) {
     var _l = 0;
     var _r = array_length(_array) - 1;
@@ -382,8 +380,8 @@ function growing_tree_maze(width, height, default_tile = 1, capacity = 0) :  maz
         
         var _cell = new vector_mapping(self.width, self.height);        
         if(self.stack.isempty()) {
-//            _cell.from_index(irandom(_mazesize - 1));
-            _cell.from_index(_mazesize - 1);
+            _cell.from_index(irandom(_mazesize - 1));
+//            _cell.from_index(_mazesize - 1);
             self.start = new vector_pos(_cell.xpos,_cell.ypos);
             self.stack.push(new vector_pos(_cell.xpos,_cell.ypos));
         } else {

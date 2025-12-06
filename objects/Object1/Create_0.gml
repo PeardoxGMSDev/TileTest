@@ -1,3 +1,5 @@
+vbuffer = undefined;
+vtexture = undefined;
 
 // Initialise vars
 tset = undefined;

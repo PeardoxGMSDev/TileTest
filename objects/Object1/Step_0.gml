@@ -113,11 +113,16 @@ if(keyboard_check(vk_space)) {
             global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
             break;
         case DRAW_MODE.TILEMAP_DYNAMIC_DRAW:
-//            global.active = DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW;
-            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
+            global.active = DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW; 
+//            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
             break;
         case DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW:
 //            global.active = DRAW_MODE.TILEMAP_CHECK;
+//            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
+              global.active = DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_STRIP; 
+            break;
+        case DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_STRIP:
+//            global.active = DRAW_MODE.TILEMAP_DYNAMIC_DRAW;
             global.active = DRAW_MODE.TILEMAP_BUILTIN;
             break;
     }

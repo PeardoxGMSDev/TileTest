@@ -7,6 +7,16 @@ enum DRAW_MODE {
     TILEMAP_DYNAMIC_BUFFER_STRIP
 }
 
+vertex_format_begin();
+vertex_format_add_position_3d();
+vertex_format_add_normal();
+vertex_format_add_texcoord();
+vertex_format_add_color();
+virtual_tilemap_vertex_format = vertex_format_end();    
+
+tileset_sprite = gmsmap;
+break_on_true = false;
+
 layout_consts = [
     {   // Native - Passthru
         width: 7, height: 7, tiles: 48
@@ -167,14 +177,30 @@ function vector_mapping(width, height) : vector_pos() constructor {
 
 /// @function tileset_data
 /// @description Tileset data
+/// @param {Real} x - x for degenerate triangle
+/// @param {Real} y - x for degenerate triangle
+/// @param {Real} z - z for degenerate triangle
+/// @param {Real} u - u for degenerate triangle
+/// @param {Real} v - v for degenerate triangle
+function degenerate_point(x, y, z, u, v) constructor {
+    self.x = x;
+    self.y = y;
+    self.z = z;
+    self.u = u;
+    self.v = v;
+    
+}
+
+/// @function tileset_data
+/// @description Tileset data
 /// @param {Real} tile_x - x offset of tile
 /// @param {Real} tile_y - y offset of tile  
 
 function tileset_rect(tile_x, tile_y, tile_width, tile_height) constructor {
-    self.left= int64(tile_x);
-    self.top = int64(tile_y);
-    self.right = int64(tile_x + tile_width);
-    self.bottom = int64(tile_y + tile_height);
+    self.left= round(tile_x);
+    self.top = round(tile_y);
+    self.right = round(tile_x + tile_width);
+    self.bottom = round(tile_y + tile_height);
 }
 
 /// @function tileset_uv
@@ -190,7 +216,7 @@ function tileset_uv(tile_x, tile_y, tile_width, tile_height, texture_width, text
 }
 
 
-/// @description Dynamically creates a tileset
+/// @description Dynamically creates a virtual_tileset
 /// @param {Asset.GMSprite} sprite - Source sprite
 /// @param {Real} tile_width - Width of each tile
 /// @param {Real} tile_height - Height of each tile  
@@ -198,24 +224,24 @@ function tileset_uv(tile_x, tile_y, tile_width, tile_height, texture_width, text
 /// @param {Real} rows - Number of rows in sprite
 /// @param {Real} [tile_count] - Number of tiles in tileset if < columns * rows
 
-function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0) constructor {
+function virtual_tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0) constructor {
     if(!sprite_exists(sprite)) {
-    throw("Bad sprite passed to tileset");  
+    throw("Bad sprite passed to virtual_tileset");  
     } 
     else if((sprite_get_width(sprite) mod columns) != 0) {
-        throw("Tileset width not divisible by columns");
+        throw("virtual_ileset width not divisible by columns");
     }
     else if((tile_width * columns) != sprite_get_width(sprite)) {
-        throw("Bad tileset width");
+        throw("Bad virtual_tileset width");
     }
     else if((sprite_get_height(sprite) mod rows) != 0) {
-        throw("Tileset height not divisible by rows");
+        throw("virtual_tileset height not divisible by rows");
     }
     else if((tile_height * rows) != sprite_get_height(sprite)) {
-        throw("Bad tileset height");
+        throw("Bad virtual_tileset height");
     }
     else if(tile_count > (columns * rows)) {
-        throw("Bad tileset count");
+        throw("Bad virtual_tileset count");
     }
     else {
         var _tt = 0;
@@ -320,7 +346,7 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
                 x, y);
             }
     }
-    
+
     /// @function set_border
     /// @description Sets tilemap border used by convert_bitmap
     /// @param {Real} [tile_border_x] - Horizontal size of border aroound tile
@@ -350,6 +376,9 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
         var _rv = false;
         if (!sprite_exists(self.sprite)) return _rv;
         
+        self.tile_width = sprite_get_width(self.sprite) div global.layout_consts[bitmap_order].width;
+        self.tile_height = sprite_get_height(self.sprite) div global.layout_consts[bitmap_order].height;
+
         var _width = (global.layout_consts[BITMAP_LAYOUT.NATIVE].width * self.tile_width) + (2 * border) + (2 * global.layout_consts[BITMAP_LAYOUT.NATIVE].width * tile_border_x);
         var _height = (global.layout_consts[BITMAP_LAYOUT.NATIVE].width * self.tile_height) + (2 * border) + (2  * global.layout_consts[BITMAP_LAYOUT.NATIVE].height * tile_border_y);
         var _surf = surface_create(_width, _height);
@@ -459,7 +488,7 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
     
     /// @function get_ref
     /// @description Returns reference to self
-    /// @return {Struct.tileset} 
+    /// @return {Struct.virtual_ileset} 
     static get_ref = function() {
         return self;
     }
@@ -476,16 +505,51 @@ function tileset(sprite, tile_width, tile_height, columns, rows, tile_count = 0)
             array_resize(self.uv, 0);
         }
     }
+    
+    static vertex_add_point = function(vbuffer, _x, _y, _z, nx, ny, nz, utex, vtex, color = c_white, alpha = 1) {
+        vertex_position_3d(vbuffer, _x, _y, _z);
+        vertex_normal(vbuffer, nx, ny, nz);
+        vertex_texcoord(vbuffer, utex, vtex);
+        vertex_color(vbuffer, color, alpha);
+    }
+    
+    static tile_test = function(idx, z, vf, tex) {
+
+        var vb = vertex_create_buffer();
+        
+        vertex_begin(vb, vf);
+        var i = 1000;
+        var j = 700;
+        var tw = 120;
+        var th = 128;
+        
+        self.vertex_add_point(vb, i,      j,      z, 0, 0, 1, self.uvs[idx].left,  self.uvs[idx].top);
+        self.vertex_add_point(vb, i,      j + th, z, 0, 0, 1, self.uvs[idx].left,  self.uvs[idx].bottom);
+        self.vertex_add_point(vb, i + tw, j,      z, 0, 0, 1, self.uvs[idx].right, self.uvs[idx].top);
+    
+        self.vertex_add_point(vb, i + tw, j,      z, 0, 0, 1, self.uvs[idx].right,  self.uvs[idx].top);
+        self.vertex_add_point(vb, i,      j + th, z, 0, 0, 1, self.uvs[idx].left,   self.uvs[idx].bottom);
+        self.vertex_add_point(vb, i + tw, j + th, z, 0, 0, 1, self.uvs[idx].right,  self.uvs[idx].bottom);
+
+        vertex_end(vb);
+        vertex_freeze(vb);
+       
+        return vb;
+    }    
 }
 
-function tilemap(width, height) constructor {
+function virtual_tilemap(width, height) constructor {
     self.ClassName = "tilemap";
     self.width = width;
     self.height = height;
     self.tiles = array_create(width * height);
     self.count = width * height;
-    self.tileset = noone;
+    self.tileset = undefined;
+    self.vertex_texture = undefined;
+    self.vertex_buffer = undefined;
+    self.vertex_format = global.virtual_tilemap_vertex_format;
     
+
     /// @function setTile
     /// @description Assign a tile to a specific row and column
     /// @param {Real} x - X position to draw at
@@ -502,12 +566,12 @@ function tilemap(width, height) constructor {
     
     /// @function assignTileset
     /// @description Assign a Tileset to a Tilemap
-    /// @param {Struct.tileset} atileset - Which tile to draw (0-based)
+    /// @param {Struct.virtual_tileset} atileset - Which tile to draw (0-based)
     static assignTileset = function(atileset) {
         self.tileset = atileset;
     }    
     
-    static draw = function(draw_mode = DRAW_MODE.TILEMAP_DYNAMIC_DRAW, left = 0, top = 0, right = 0, bottom = 0) {
+    static _draw_with_sprites = function(left = 0, top = 0, right = 0, bottom = 0) {
         var _count = 0;
         var _unbound = ((top == 0) && (left == 0) && (bottom == 0) && (right == 0));
         if(self.tileset == noone) return _count;
@@ -532,6 +596,163 @@ function tilemap(width, height) constructor {
             }
         }
         return _count;
+    }
+
+    static _vertex_add_point = function(vbuffer, _x, _y, _z, nx, ny, nz, utex, vtex, color = c_white, alpha = 1) {
+        vertex_position_3d(vbuffer, _x, _y, _z);
+        vertex_normal(vbuffer, nx, ny, nz);
+        vertex_texcoord(vbuffer, utex, vtex);
+        vertex_color(vbuffer, color, alpha);
+    }
+    
+    /// @function _vertex_add_quad
+    /// @description Create two triangles in rect and add them to vertex buffer
+    /// @param {Struct.tileset_rect} rect - Which tile to draw (0-based)
+    /// @param {Struct.tileset_uv} uvs - Which tile to draw (0-based)
+    /// @param {Real} z - Depth of vertex
+    static _vertex_add_quad_list = function(rect, uvs, z) {
+        self._vertex_add_point(self.vertex_buffer, rect.left,  rect.top,    z, 0, 0, 1, uvs.left,  uvs.top);
+        self._vertex_add_point(self.vertex_buffer, rect.left,  rect.bottom, z, 0, 0, 1, uvs.left,  uvs.bottom);
+        self._vertex_add_point(self.vertex_buffer, rect.right, rect.top,    z, 0, 0, 1, uvs.right, uvs.top);
+        
+        self._vertex_add_point(self.vertex_buffer, rect.right, rect.top,    z, 0, 0, 1, uvs.right,  uvs.top);
+        self._vertex_add_point(self.vertex_buffer, rect.left,  rect.bottom, z, 0, 0, 1, uvs.left,   uvs.bottom);
+        self._vertex_add_point(self.vertex_buffer, rect.right, rect.bottom, z, 0, 0, 1, uvs.right,  uvs.bottom);
+    }
+    
+    /// @function _vertex_add_quad
+    /// @description Create two triangles in rect and add them to vertex buffer
+    /// @param {Struct.tileset_rect} rect - Which tile to draw (0-based)
+    /// @param {Struct.tileset_uv} uvs - Which tile to draw (0-based)
+    /// @param {Real} z - Depth of vertex
+    static _vertex_add_quad_strip = function(rect, uvs, z, return_degenerate = false) {
+        self._vertex_add_point(self.vertex_buffer, rect.left,  rect.top,    z, 0, 0, 1, uvs.left,  uvs.top);
+        self._vertex_add_point(self.vertex_buffer, rect.left,  rect.bottom, z, 0, 0, 1, uvs.left,  uvs.bottom);
+        self._vertex_add_point(self.vertex_buffer, rect.right, rect.top,    z, 0, 0, 1, uvs.right, uvs.top);
+        self._vertex_add_point(self.vertex_buffer, rect.right, rect.bottom, z, 0, 0, 1, uvs.right,  uvs.bottom);
+        
+        if(return_degenerate) {
+            return new degenerate_point(rect.right, rect.bottom, z, uvs.right,  uvs.bottom);
+        }
+    }
+    
+    static _vertex_construct_triangle_strip = function(depth) {
+
+        self.vertex_buffer = vertex_create_buffer();
+        
+        vertex_begin(self.vertex_buffer, self.vertex_format);
+
+        var _count = 0;
+        var _degen = undefined;
+        if(is_undefined(self.tileset)) return _count;
+        var _tile_width = self.tileset.tile_width;
+        var _tile_height = self.tileset.tile_height;
+        // Loop over rows in dynamic tileset
+        for(var _y = 0; _y < self.height; _y++) {
+            // Loop over columns in dynamic tileset
+            for(var _x = 0; _x < self.width; _x++) {
+              //  if(_y != 10) {continue;}
+                var _index = _x + (_y * self.width);
+                var _tile = self.tiles[_index] + 1;
+                var _rect = new tileset_rect(_x * _tile_width, _y * _tile_height, _tile_width, _tile_height);
+                var _uvs = self.tileset.uvs[_tile];
+                if(_x == (self.width - 1)) {
+                    _degen = self._vertex_add_quad_strip(_rect, _uvs, depth, true);
+                } else {
+                    self._vertex_add_quad_strip(_rect, _uvs, depth);
+                }
+                delete(_rect);
+            }
+            if(!is_undefined(_degen)) {
+                self._vertex_add_point(self.vertex_buffer, _degen.x, _degen.y, _degen.z, 0, 0, 1, _degen.u,  _degen.v);
+                delete(_degen);
+            }
+        }
+        vertex_end(self.vertex_buffer);
+        vertex_freeze(self.vertex_buffer);
+       
+        return _count;
+    }
+
+    static _vertex_construct_triangle_list = function(depth) {
+
+        self.vertex_buffer = vertex_create_buffer();
+        
+        vertex_begin(self.vertex_buffer, self.vertex_format);
+
+        var _count = 0;
+        if(is_undefined(self.tileset)) return _count;
+        var _tile_width = self.tileset.tile_width;
+        var _tile_height = self.tileset.tile_height;
+        // Loop over rows in dynamic tileset
+        for(var _y = 0; _y < self.height; _y++) {
+            // Loop over columns in dynamic tileset
+            for(var _x = 0; _x < self.width; _x++) {
+                var _index = _x + (_y * self.width);
+                var _tile = self.tiles[_index] + 1;
+                var _rect = new tileset_rect(_x * _tile_width, _y * _tile_height, _tile_width, _tile_height);
+                var _uvs = self.tileset.uvs[_tile];
+                self._vertex_add_quad_list(_rect, _uvs, depth);
+            }
+        }
+        vertex_end(self.vertex_buffer);
+        vertex_freeze(self.vertex_buffer);
+       
+        return _count;
+    }    
+
+    static _draw_with_triangle_list = function(left = 0, top = 0, right = 0, bottom = 0) {
+        var _rval = 0;
+        if(is_undefined(self.tileset)) {
+            throw("Trying to use __draw_with_triangle_list without an assigned tileset");
+        }
+        if(is_undefined(self.vertex_texture)) {
+            self.vertex_texture = sprite_get_texture(self.tileset.border_sprite, 0);
+            show_debug_message("Constructed texture");
+        }
+        if(is_undefined(self.vertex_buffer)) {
+            self._vertex_construct_triangle_list(0);
+            show_debug_message("Constructed buffer");
+        }
+        vertex_submit(self.vertex_buffer, pr_trianglelist, self.vertex_texture);
+        return vertex_get_buffer_size(self.vertex_buffer); // self.width * self.height;
+            
+    }    
+    
+    static _draw_with_triangle_strip = function(left = 0, top = 0, right = 0, bottom = 0) {
+        var _rval = 0;
+        if(is_undefined(self.tileset)) {
+            throw("Trying to use __draw_with_triangle_list without an assigned tileset");
+        }
+        if(is_undefined(self.vertex_texture)) {
+            self.vertex_texture = sprite_get_texture(self.tileset.border_sprite, 0);
+        }
+        if(is_undefined(self.vertex_buffer)) {
+            self._vertex_construct_triangle_strip(0);
+        }
+        vertex_submit(self.vertex_buffer, pr_trianglestrip, self.vertex_texture);
+        return vertex_get_buffer_size(self.vertex_buffer); // self.width * self.height;
+            
+    }    
+    
+    static draw = function(draw_mode = DRAW_MODE.TILEMAP_DYNAMIC_DRAW, left = 0, top = 0, right = 0, bottom = 0) {
+        var _rval = 0;
+        switch (draw_mode) {
+            case DRAW_MODE.TILEMAP_DYNAMIC_DRAW:
+                _rval = self._draw_with_sprites(left, top, right, bottom);
+                break;
+            case DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_ROW:
+                _rval = self._draw_with_triangle_list(left, top, right, bottom);
+                break;
+            case DRAW_MODE.TILEMAP_DYNAMIC_BUFFER_STRIP:
+                _rval = self._draw_with_triangle_strip(left, top, right, bottom);
+                break;
+            default:
+                throw("Bad draw_mode specified in virtual_tileset.draw");
+                break; 
+        }
+        
+        return _rval;
     }
     
     static remap_tiles = function(left = 0, top = 0, right = 0, bottom = 0) {
@@ -579,81 +800,3 @@ function tilemap(width, height) constructor {
     }
 }
 
-/*
-function create_floor_from_tile_layer(layer_id)
-{
-    function vertex_add_point(vbuffer, _x, _y, _z, nx, ny, nz, utex, vtex, color = c_white, alpha = 1)
-    {
-        vertex_position_3d(vbuffer, _x, _y, _z);
-        vertex_texcoord(vbuffer, utex, vtex);
-        vertex_normal(vbuffer, nx, ny, nz);
-        vertex_color(vbuffer, color, alpha);
-    }
-   
-    var tmap = layer_tilemap_get_id(layer_id);
-    var tset = tilemap_get_tileset(tmap);
-    var info = tileset_get_info(tset);
-    var uvs = tileset_get_uvs(tset);// space the tileset uses in texture (of other tilesets too)
-    var tex = info.texture;
-    var tsw = info.width;
-    var tsh = info.height;
-    var tw = info.tile_width;
-    var th = info.tile_height;
-    var tc = info.tile_columns; // 8 for me (my tileset shows 8x16 tiles)
-    var tr = info.tile_count / tc; // 16
-    var ths = info.tile_horizontal_separator;
-    var tvs = info.tile_vertical_separator;
-    var hp = tw / tsw;
-    var vp = th / tsh;
-   
-    // normalized texture space coordinates (0...1)
-    var x1 = uvs[0]; var x2 = uvs[2];
-    var y1 = uvs[1]; var y2 = uvs[3];
-   
-    var z = layer_get_depth(layer_id);
-    var vb = vertex_create_buffer();
-    vertex_begin(vb, global.vertex_format);
-   
-    for (var i = 0; i <  room_width; i += tw) {
-    for (var j = 0; j < room_height; j += th) {
-       
-        var tdata = tilemap_get(tmap, i / tw, j / th);
-        if (tdata != 0)
-        {
-            var tind = tile_get_index(tdata);
-           
-            // tile index for hor and ver
-            var tile_x = tind mod tc;
-            var tile_y = tind div tc;
-           
-            // pixel pos
-            var txp = tile_x * (tw + 2 * ths) + ths;
-            var typ = tile_y * (th + 2 * tvs) + tvs;
-           
-            // percentage
-            var xframe = txp / tsw;
-            var yframe = typ / tsh;
-       
-            // normalized pos
-            var u1 = lerp(x1, x2, xframe);
-            var v1 = lerp(y1, y2, yframe);
-            var u2 = lerp(x1, x2, xframe + hp);
-            var v2 = lerp(y1, y2, yframe + vp);
-           
-            vertex_add_point(vb, i,            j,        z, 0, 0, -1, u1, v1);
-            vertex_add_point(vb, i + tw,    j,        z, 0, 0, -1, u2, v1);
-            vertex_add_point(vb, i + tw,    j + th,    z, 0, 0, -1, u2, v2);
-           
-            vertex_add_point(vb, i + tw,    j + th, z, 0, 0, -1, u2, v2);
-            vertex_add_point(vb, i,            j + th,    z, 0, 0, -1, u1, v2);
-            vertex_add_point(vb, i,            j,        z, 0, 0, -1, u1, v1);
-        }
-    }}
-   
-    vertex_end(vb);
-    vertex_freeze(vb);
-    layer_set_visible(layer_id, false);
-   
-    return {vbuffer: vb, texture: tex};
-}
-*/
